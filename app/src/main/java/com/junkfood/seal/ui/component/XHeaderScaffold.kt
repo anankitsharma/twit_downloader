@@ -2,6 +2,7 @@ package com.junkfood.seal.ui.component
 
 import android.os.Build
 import android.view.WindowInsetsController
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,11 +22,13 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowInsetsControllerCompat
 
 @Composable
 fun XHeaderScaffold(
@@ -31,10 +36,15 @@ fun XHeaderScaffold(
     title: String = "Home",
     content: @Composable () -> Unit = {}
 ) {
-    val topBarHeight = 88.dp
+    val topBarHeight = 72.dp
 
     val view = LocalView.current
     SideEffect {
+        // Ensure status bar area is black and icons are light-on-dark
+        (view.context as? Activity)?.window?.let { window ->
+            window.statusBarColor = Color.Black.toArgb()
+            WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = false
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             view.windowInsetsController?.setSystemBarsAppearance(
                 0,
@@ -44,20 +54,28 @@ fun XHeaderScaffold(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
+        val statusTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
-                .height(topBarHeight)
                 .background(Color(0xFF000000))
-                .padding(horizontal = 16.dp),
-            contentAlignment = Alignment.CenterStart
+                .height(topBarHeight + statusTop)
         ) {
-            Text(
-                text = title,
-                color = Color.White,
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(topBarHeight)
+                    .padding(horizontal = 16.dp)
+                    .align(Alignment.TopStart)
+                    .padding(top = statusTop),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = title,
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+                )
+            }
         }
 
         Surface(
@@ -65,8 +83,8 @@ fun XHeaderScaffold(
                 .fillMaxSize()
                 .offset(y = (-24).dp),
             color = Color.White,
-            shadowElevation = 8.dp,
-            tonalElevation = 8.dp,
+            shadowElevation = 12.dp,
+            tonalElevation = 12.dp,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
             content()
