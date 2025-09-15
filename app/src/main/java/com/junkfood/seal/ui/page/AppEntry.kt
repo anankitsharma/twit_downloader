@@ -145,14 +145,14 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(paddingValues)) {
             NavigationDrawer(
                 windowWidth = windowWidth,
                 drawerState = drawerState,
                 currentRoute = currentRoute,
                 currentTopDestination = currentTopDestination,
                 showQuickSettings = true,
-                gesturesEnabled = currentRoute == Route.HOME_TAB,
+                gesturesEnabled = false,
                 onDismissRequest = { drawerState.close() },
                 onNavigateToRoute = {
                     if (currentRoute != it) {
@@ -205,11 +205,7 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                 // Bottom tab routes
                 animatedComposable(Route.HOME_TAB) {
                     HomeTabScreen(
-                        dialogViewModel = dialogViewModel,
-                        onMenuOpen = {
-                            view.slightHapticFeedback()
-                            scope.launch { drawerState.open() }
-                        }
+                        dialogViewModel = dialogViewModel
                     )
                 }
                 animatedComposable(Route.DOWNLOAD_TAB) {
@@ -328,8 +324,7 @@ private fun AppEntryHomePreview() {
     MaterialTheme {
         // Simplified preview showing just the Home tab content
         HomeTabScreen(
-            dialogViewModel = null,
-            onMenuOpen = {}
+            dialogViewModel = null
         )
     }
 }
@@ -382,7 +377,6 @@ private fun AppEntryCompletePreview() {
         ) { paddingValues ->
             HomeTabScreen(
                 dialogViewModel = null,
-                onMenuOpen = {},
                 modifier = Modifier.padding(paddingValues)
             )
         }

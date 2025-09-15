@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -100,6 +99,7 @@ import com.junkfood.seal.ui.common.LocalDarkTheme
 import com.junkfood.seal.ui.common.LocalFixedColorRoles
 import com.junkfood.seal.ui.common.LocalWindowWidthState
 import com.junkfood.seal.ui.component.SealModalBottomSheet
+import com.junkfood.seal.ui.component.XHeaderScaffold
 import com.junkfood.seal.ui.component.SelectionGroupDefaults
 import com.junkfood.seal.ui.component.SelectionGroupItem
 import com.junkfood.seal.ui.component.SelectionGroupRow
@@ -203,45 +203,47 @@ fun DownloadPageV2(
     val clipboardManager = LocalClipboardManager.current
     val uriHandler = LocalUriHandler.current
 
-    DownloadPageImplV2(
-        modifier = modifier,
-        taskDownloadStateMap = downloader.getTaskStateMap(),
-        downloadCallback = {
+    XHeaderScaffold(title = stringResource(R.string.downloads_history)) {
+        DownloadPageImplV2(
+            modifier = Modifier,
+            taskDownloadStateMap = downloader.getTaskStateMap(),
+            downloadCallback = {
+                view.slightHapticFeedback()
+                dialogViewModel.postAction(Action.ShowSheet())
+            },
+            onMenuOpen = onMenuOpen,
+        ) { task, action ->
             view.slightHapticFeedback()
-            dialogViewModel.postAction(Action.ShowSheet())
-        },
-        onMenuOpen = onMenuOpen,
-    ) { task, action ->
-        view.slightHapticFeedback()
-        when (action) {
-            UiAction.Cancel -> downloader.cancel(task)
-            UiAction.Delete -> downloader.remove(task)
-            UiAction.Resume -> downloader.restart(task)
-            is UiAction.CopyErrorReport -> {
-                clipboardManager.setText(
-                    AnnotatedString(getErrorReport(action.throwable, task.url))
-                )
-                context.makeToast(R.string.error_copied)
-            }
-            UiAction.CopyVideoURL -> {
-                clipboardManager.setText(AnnotatedString(task.url))
-                context.makeToast(R.string.link_copied)
-            }
-            is UiAction.OpenFile -> {
-                action.filePath?.let {
-                    FileUtil.openFile(path = it) { context.makeToast(R.string.file_unavailable) }
+            when (action) {
+                UiAction.Cancel -> downloader.cancel(task)
+                UiAction.Delete -> downloader.remove(task)
+                UiAction.Resume -> downloader.restart(task)
+                is UiAction.CopyErrorReport -> {
+                    clipboardManager.setText(
+                        AnnotatedString(getErrorReport(action.throwable, task.url))
+                    )
+                    context.makeToast(R.string.error_copied)
                 }
-            }
-            is UiAction.OpenThumbnailURL -> {
-                uriHandler.openUri(action.url)
-            }
-            is UiAction.OpenVideoURL -> {
-                uriHandler.openUri(action.url)
-            }
-            is UiAction.ShareFile -> {
-                val shareTitle = context.getString(R.string.share)
-                FileUtil.createIntentForSharingFile(action.filePath)?.let {
-                    context.startActivity(Intent.createChooser(it, shareTitle))
+                UiAction.CopyVideoURL -> {
+                    clipboardManager.setText(AnnotatedString(task.url))
+                    context.makeToast(R.string.link_copied)
+                }
+                is UiAction.OpenFile -> {
+                    action.filePath?.let {
+                        FileUtil.openFile(path = it) { context.makeToast(R.string.file_unavailable) }
+                    }
+                }
+                is UiAction.OpenThumbnailURL -> {
+                    uriHandler.openUri(action.url)
+                }
+                is UiAction.OpenVideoURL -> {
+                    uriHandler.openUri(action.url)
+                }
+                is UiAction.ShareFile -> {
+                    val shareTitle = context.getString(R.string.share)
+                    FileUtil.createIntentForSharingFile(action.filePath)?.let {
+                        context.startActivity(Intent.createChooser(it, shareTitle))
+                    }
                 }
             }
         }
@@ -345,7 +347,7 @@ fun DownloadPageImplV2(
     }
 
     Scaffold(
-        modifier = modifier.fillMaxSize().statusBarsPadding(),
+        modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         floatingActionButton = { FABs(modifier = Modifier, downloadCallback = downloadCallback) },
     ) { windowInsetsPadding ->

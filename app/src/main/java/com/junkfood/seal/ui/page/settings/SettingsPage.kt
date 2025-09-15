@@ -15,7 +15,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -25,6 +28,10 @@ import androidx.compose.material.icons.rounded.Cookie
 import androidx.compose.material.icons.rounded.EnergySavingsLeaf
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.SettingsApplications
 import androidx.compose.material.icons.rounded.SignalCellular4Bar
@@ -53,13 +60,18 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import com.junkfood.seal.App
 import com.junkfood.seal.R
 import com.junkfood.seal.ui.common.Route
 import com.junkfood.seal.ui.common.intState
 import com.junkfood.seal.ui.component.BackButton
-import com.junkfood.seal.ui.component.PreferencesHintCard
-import com.junkfood.seal.ui.component.SettingItem
+import com.junkfood.seal.ui.component.SettingRow
+import com.junkfood.seal.ui.common.LocalDarkTheme
+import com.junkfood.seal.util.DarkThemePreference.Companion.FOLLOW_SYSTEM
+import com.junkfood.seal.util.DarkThemePreference.Companion.OFF
+import com.junkfood.seal.util.DarkThemePreference.Companion.ON
+import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.EXTRACT_AUDIO
 import com.junkfood.seal.util.PreferenceUtil.getBoolean
 import com.junkfood.seal.util.PreferenceUtil.updateInt
@@ -70,167 +82,168 @@ import com.junkfood.seal.util.SHOW_SPONSOR_MSG
 @Composable
 fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
     val context = LocalContext.current
-    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-    var showBatteryHint by remember {
-        mutableStateOf(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                !pm.isIgnoringBatteryOptimizations(context.packageName)
-            } else {
-                false
-            }
-        )
-    }
-    val intent =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                data = Uri.parse("package:${context.packageName}")
-            }
-        } else {
-            Intent()
-        }
-    val isActivityAvailable: Boolean =
-        if (Build.VERSION.SDK_INT < 23) false
-        else if (Build.VERSION.SDK_INT < 33)
-            context.packageManager
-                .queryIntentActivities(intent, PackageManager.MATCH_ALL)
-                .isNotEmpty()
-        else
-            context.packageManager
-                .queryIntentActivities(
-                    intent,
-                    PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY.toLong()),
-                )
-                .isNotEmpty()
+    // Minimal settings: remove battery/sponsor flows, keep simple items only
 
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                showBatteryHint = !pm.isIgnoringBatteryOptimizations(context.packageName)
-            }
-        }
-    val showSponsorMessage by SHOW_SPONSOR_MSG.intState
-
-    LaunchedEffect(Unit) { SHOW_SPONSOR_MSG.updateInt(showSponsorMessage + 1) }
+    val darkThemePreference = LocalDarkTheme.current
+    var showThemeDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                item {
-                    AnimatedVisibility(
-                        visible = showBatteryHint && isActivityAvailable,
-                        exit = shrinkVertically() + fadeOut(),
-                    ) {
-                        PreferencesHintCard(
-                            title = stringResource(R.string.battery_configuration),
-                            icon = Icons.Rounded.EnergySavingsLeaf,
-                            description = stringResource(R.string.battery_configuration_desc),
-                        ) {
-                            launcher.launch(intent)
-                            showBatteryHint =
-                                !pm.isIgnoringBatteryOptimizations(context.packageName)
-                        }
-                    }
-                }
-            }
-            if (!showBatteryHint && showSponsorMessage > 30)
-                item {
-                    PreferencesHintCard(
-                        title = stringResource(id = R.string.sponsor),
-                        icon = Icons.Rounded.VolunteerActivism,
-                        description = stringResource(id = R.string.sponsor_desc),
-                    ) {
-                        onNavigateTo(Route.DONATE)
-                    }
-                }
+            // Dark Theme (top-level)
             item {
-                SettingItem(
-                    title = stringResource(id = R.string.general_settings),
-                    description = stringResource(id = R.string.general_settings_desc),
-                    icon = Icons.Rounded.SettingsApplications,
-                ) {
-                    onNavigateTo(Route.GENERAL_DOWNLOAD_PREFERENCES)
+                val themeSubtitle = when (darkThemePreference.darkThemeValue) {
+                    FOLLOW_SYSTEM -> stringResource(R.string.follow_system)
+                    ON -> stringResource(R.string.on)
+                    OFF -> stringResource(R.string.off)
+                    else -> stringResource(R.string.follow_system)
                 }
-            }
-            item {
-                SettingItem(
-                    title = stringResource(id = R.string.download_directory),
-                    description = stringResource(id = R.string.download_directory_desc),
-                    icon = Icons.Rounded.Folder,
-                ) {
-                    onNavigateTo(Route.DOWNLOAD_DIRECTORY)
-                }
-            }
-            item {
-                SettingItem(
-                    title = stringResource(id = R.string.format),
-                    description = stringResource(id = R.string.format_settings_desc),
-                    icon =
-                        if (EXTRACT_AUDIO.getBoolean()) Icons.Rounded.AudioFile
-                        else Icons.Rounded.VideoFile,
-                ) {
-                    onNavigateTo(Route.DOWNLOAD_FORMAT)
-                }
-            }
-            item {
-                SettingItem(
-                    title = stringResource(id = R.string.network),
-                    description = stringResource(id = R.string.network_settings_desc),
-                    icon =
-                        if (App.connectivityManager.isActiveNetworkMetered)
-                            Icons.Rounded.SignalCellular4Bar
-                        else Icons.Rounded.SignalWifi4Bar,
-                ) {
-                    onNavigateTo(Route.NETWORK_PREFERENCES)
-                }
-            }
-            item {
-                SettingItem(
-                    title = stringResource(id = R.string.cookies),
-                    description = stringResource(id = R.string.cookies_desc),
-                    icon = Icons.Rounded.Cookie,
-                ) {
-                    onNavigateTo(Route.COOKIE_PROFILE)
-                }
-            }
-            item {
-                SettingItem(
-                    title = stringResource(id = R.string.look_and_feel),
-                    description = stringResource(id = R.string.display_settings),
+                SettingRow(
                     icon = Icons.Rounded.Palette,
-                ) {
-                    onNavigateTo(Route.APPEARANCE)
-                }
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    title = stringResource(id = R.string.dark_theme),
+                    subtitle = themeSubtitle,
+                    onClick = { showThemeDialog = true }
+                )
             }
+            // Display Language (top-level)
             item {
-                SettingItem(
-                    title = stringResource(id = R.string.interface_and_interaction),
-                    description = stringResource(id = R.string.settings_before_download),
-                    icon = Icons.Rounded.ViewComfy,
-                ) {
-                    onNavigateTo(Route.INTERACTION)
-                }
+                val langSubtitle = "English" // Default fallback
+                SettingRow(
+                    icon = Icons.Outlined.Language,
+                    iconTint = MaterialTheme.colorScheme.secondary,
+                    badgeColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                    title = stringResource(id = R.string.language),
+                    subtitle = langSubtitle,
+                    onClick = { onNavigateTo(Route.LANGUAGES) }
+                )
             }
+            // Display settings (optional link to full appearance page if needed)
             item {
-                SettingItem(
-                    title = stringResource(id = R.string.trouble_shooting),
-                    description = stringResource(id = R.string.trouble_shooting_desc),
-                    icon = Icons.Rounded.BugReport,
-                ) {
-                    onNavigateTo(Route.TROUBLESHOOTING)
-                }
+                SettingRow(
+                    icon = Icons.Rounded.Palette,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    title = stringResource(id = R.string.display_settings),
+                    subtitle = stringResource(id = R.string.look_and_feel),
+                    onClick = { onNavigateTo(Route.APPEARANCE) }
+                )
             }
+            // Login X -> open existing cookies page for now
             item {
-                SettingItem(
-                    title = stringResource(id = R.string.about),
-                    description = stringResource(id = R.string.about_page),
-                    icon = Icons.Rounded.Info,
-                ) {
-                    onNavigateTo(Route.ABOUT)
-                }
+                SettingRow(
+                    icon = Icons.Rounded.SettingsApplications,
+                    iconTint = MaterialTheme.colorScheme.tertiary,
+                    badgeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
+                    title = "Login X",
+                    subtitle = "Login to improve experience",
+                    onClick = { onNavigateTo(Route.COOKIE_PROFILE) }
+                )
+            }
+            // Rate us
+            item {
+                SettingRow(
+                    icon = Icons.Rounded.Star,
+                    iconTint = MaterialTheme.colorScheme.secondary,
+                    badgeColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                    title = "Rate Us",
+                    subtitle = "Enjoying the app? Give us a 5 star.",
+                    onClick = {
+                    // Open Play Store listing
+                    val pkg = context.packageName
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    try { context.startActivity(intent) } catch (e: Exception) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$pkg")))
+                    }
+                    }
+                )
+            }
+            // Privacy policy
+            item {
+                SettingRow(
+                    icon = Icons.Rounded.Lock,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    title = "Privacy Policy",
+                    subtitle = "Read privacy policy for using our app.",
+                    onClick = {
+                    // Open privacy URL (replace with your actual link)
+                    val url = "https://example.com/privacy"
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    }
+                )
+            }
+            // Contact / Feedback
+            item {
+                SettingRow(
+                    icon = Icons.Rounded.Email,
+                    iconTint = MaterialTheme.colorScheme.tertiary,
+                    badgeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
+                    title = "Contact Us",
+                    subtitle = "Your feedback matters! Reach out to us",
+                    onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:")
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("support@example.com"))
+                        putExtra(Intent.EXTRA_SUBJECT, "Feedback - ${context.getString(R.string.app_name)}")
+                    }
+                    try { context.startActivity(intent) } catch (_: Exception) {}
+                    }
+                )
+            }
+            // Version label at bottom
+            item {
+                androidx.compose.material3.Text(
+                    text = "Version " + com.junkfood.seal.BuildConfig.VERSION_NAME,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 8.dp),
+                    textAlign = TextAlign.Center
+                )
             }
         }
+
+    if (showThemeDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
+            title = { Text(text = stringResource(id = R.string.dark_theme)) },
+            text = {
+                LazyColumn {
+                    item {
+                        androidx.compose.material3.ListItem(
+                            headlineContent = { Text(stringResource(R.string.follow_system)) },
+                            modifier = Modifier.clickable {
+                                PreferenceUtil.modifyDarkThemePreference(FOLLOW_SYSTEM)
+                                showThemeDialog = false
+                            }
+                        )
+                    }
+                    item {
+                        androidx.compose.material3.ListItem(
+                            headlineContent = { Text(stringResource(R.string.on)) },
+                            modifier = Modifier.clickable {
+                                PreferenceUtil.modifyDarkThemePreference(ON)
+                                showThemeDialog = false
+                            }
+                        )
+                    }
+                    item {
+                        androidx.compose.material3.ListItem(
+                            headlineContent = { Text(stringResource(R.string.off)) },
+                            modifier = Modifier.clickable {
+                                PreferenceUtil.modifyDarkThemePreference(OFF)
+                                showThemeDialog = false
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {}
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -251,64 +264,7 @@ private fun SettingsPagePreview() {
                 )
             }
         ) { paddingValues ->
-            LazyColumn(contentPadding = paddingValues) {
-                item {
-                    SettingItem(
-                        title = "General Settings",
-                        description = "General download preferences",
-                        icon = Icons.Rounded.SettingsApplications,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "Download Directory",
-                        description = "Choose download location",
-                        icon = Icons.Rounded.Folder,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "Format",
-                        description = "Video and audio format settings",
-                        icon = Icons.Rounded.VideoFile,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "Network",
-                        description = "Network and connection settings",
-                        icon = Icons.Rounded.SignalWifi4Bar,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "Cookies",
-                        description = "Cookie management",
-                        icon = Icons.Rounded.Cookie,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "Look and Feel",
-                        description = "Appearance and theme settings",
-                        icon = Icons.Rounded.Palette,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "Interface and Interaction",
-                        description = "UI and interaction preferences",
-                        icon = Icons.Rounded.ViewComfy,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "About",
-                        description = "App information and credits",
-                        icon = Icons.Rounded.Info,
-                    ) {}
-                }
-            }
+            LazyColumn(contentPadding = paddingValues) { }
         }
     }
 }

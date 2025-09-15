@@ -26,8 +26,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import com.junkfood.seal.ui.component.XHeaderScaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,8 +58,7 @@ import com.junkfood.seal.ui.util.UrlRules
 @Composable
 fun HomeTabScreen(
     modifier: Modifier = Modifier,
-    dialogViewModel: com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel? = null,
-    onMenuOpen: () -> Unit = {}
+    dialogViewModel: com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel? = null
 ) {
     var urlText by remember { mutableStateOf("") }
     val clipboardManager = LocalClipboardManager.current
@@ -83,29 +81,10 @@ fun HomeTabScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("X Video Downloader", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
-                navigationIcon = {
-                    IconButton(onClick = onMenuOpen) {
-                        Icon(
-                            imageVector = Icons.Outlined.Menu,
-                            contentDescription = "Menu"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-        }
-    ) { paddingValues ->
+    XHeaderScaffold(title = "Home") {
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -278,8 +257,7 @@ fun HomeTabScreen(
 private fun HomeTabScreenPreview() {
     MaterialTheme {
         HomeTabScreen(
-            dialogViewModel = null, // Preview doesn't need real ViewModel
-            onMenuOpen = {}
+            dialogViewModel = null // Preview doesn't need real ViewModel
         )
     }
 }
@@ -289,8 +267,7 @@ private fun HomeTabScreenPreview() {
 private fun HomeTabScreenDarkPreview() {
     MaterialTheme {
         HomeTabScreen(
-            dialogViewModel = null, // Preview doesn't need real ViewModel
-            onMenuOpen = {}
+            dialogViewModel = null // Preview doesn't need real ViewModel
         )
     }
 }
@@ -300,8 +277,7 @@ private fun HomeTabScreenDarkPreview() {
 private fun HomeTabScreenLargePreview() {
     MaterialTheme {
         HomeTabScreen(
-            dialogViewModel = null, // Preview doesn't need real ViewModel
-            onMenuOpen = {}
+            dialogViewModel = null // Preview doesn't need real ViewModel
         )
     }
 }
