@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,12 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -30,6 +36,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import android.app.Activity
+import androidx.core.view.WindowInsetsControllerCompat
+import android.graphics.drawable.ColorDrawable
 import androidx.navigation.navigation
 import com.junkfood.seal.App
 import com.junkfood.seal.R
@@ -97,6 +106,16 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     val appName = stringResource(R.string.app_name)
     val scope = rememberCoroutineScope()
 
+    // Keep status bar painted and consistent across tab transitions
+    SideEffect {
+        (view.context as? Activity)?.window?.let { window ->
+            val topColor = Color.Black
+            window.statusBarColor = topColor.toArgb()
+            WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = false
+            window.setBackgroundDrawable(ColorDrawable(topColor.toArgb()))
+        }
+    }
+
     val onNavigateBack: () -> Unit = {
         with(navController) {
             if (currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
@@ -151,11 +170,17 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
             }
         }
     ) { paddingValues ->
+        // Apply only start/top/end padding so content can extend beneath the bottom bar
+        val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues)
+                .padding(
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = paddingValues.calculateEndPadding(layoutDirection)
+                )
         ) {
             NavigationDrawer(
                 windowWidth = windowWidth,
@@ -182,6 +207,12 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                     )
                 },
             ) {
+                // Crossfade tab destinations to avoid flashes while keeping the top area stable
+                androidx.compose.animation.Crossfade(
+                    targetState = navController.currentBackStackEntryAsState().value?.destination?.route,
+                    animationSpec = androidx.compose.animation.core.tween(150)
+                ) { routeKey ->
+                key(routeKey) {
                 NavHost(
                     modifier = Modifier.align(Alignment.Center),
                     navController = navController,
@@ -237,7 +268,9 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                         onNavigateTo = { route -> navController.navigate(route = route) { launchSingleTop = true } },
                         cookiesViewModel = cookiesViewModel
                     )
-                } // <-- closes NavHost
+                } // <-- closes NavHost inside key
+                } // <-- closes key
+                }
 
             } // <-- closes NavigationDrawer content lambda (MISSING brace was added here)
 
