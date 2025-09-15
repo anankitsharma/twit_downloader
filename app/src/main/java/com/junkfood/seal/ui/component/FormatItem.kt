@@ -81,26 +81,13 @@ fun FormatVideoPreview(
 ) {
     Box(modifier = Modifier.fillMaxWidth().wrapContentHeight(Alignment.Top, unbounded = false)) {
         Row(modifier = modifier.fillMaxWidth()) {
-            Box(modifier = Modifier) {
+            Box(modifier = Modifier.size(64.dp)) {
                 MediaImage(
-                    modifier = Modifier,
+                    modifier = Modifier.matchParentSize().clip(MaterialTheme.shapes.small),
                     imageModel = thumbnailUrl,
                     isAudio = false,
                     contentDescription = stringResource(id = R.string.thumbnail),
                 )
-                Surface(
-                    modifier = Modifier.padding(2.dp).align(Alignment.BottomEnd),
-                    color = Color.Black.copy(alpha = 0.68f),
-                    shape = MaterialTheme.shapes.extraSmall,
-                ) {
-                    val durationText = duration.toDurationText()
-                    Text(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        text = durationText,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                    )
-                }
             }
 
             Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Top) {
@@ -112,15 +99,6 @@ fun FormatVideoPreview(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (author != "playlist" && author != "null")
-                    Text(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(top = 3.dp),
-                        text = author,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
             }
         }
         var expanded by remember { mutableStateOf(false) }
