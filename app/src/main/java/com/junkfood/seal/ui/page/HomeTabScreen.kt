@@ -21,7 +21,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,6 +43,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalConfiguration
@@ -79,7 +82,7 @@ fun HomeTabScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(" ") },
+                title = { Text("X Video Downloader", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = onMenuOpen) {
                         Icon(
@@ -102,32 +105,6 @@ fun HomeTabScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Welcome Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Welcome to Seal",
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Download videos from various platforms. Paste a URL or use the paste button to get started",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
-
             // URL Input Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -138,17 +115,14 @@ fun HomeTabScreen(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(
-                        text = "Video URL",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
-                    OutlinedTextField(
+                    TextField(
                         value = urlText,
                         onValueChange = { urlText = it },
-                        label = { Text("Enter video URL") },
-                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Enter Post Link") },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
                         trailingIcon = {
                             IconButton(
                                 onClick = {
@@ -183,7 +157,7 @@ fun HomeTabScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Button(
+                        FilledTonalButton(
                             onClick = {
                                 val clipboardText = clipboardManager.getText()?.toString() ?: ""
                                 urlText = clipboardText
@@ -191,7 +165,8 @@ fun HomeTabScreen(
                                     dialogViewModel?.postAction(Action.ShowSheet(listOf(clipboardText)))
                                 }
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                         ) {
                             Icon(
                                 Icons.Outlined.ContentPaste,
@@ -214,7 +189,12 @@ fun HomeTabScreen(
                                     dialogViewModel?.postAction(Action.ShowSheet())
                                 }
                             },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
                             enabled = true // Always enabled, will use URL if available
                         ) {
                             Icon(
@@ -233,29 +213,7 @@ fun HomeTabScreen(
                 }
             }
 
-            // Quick Actions
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Quick Actions",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-                    
-                    Text(
-                        text = "• Paste URL from clipboard\n• Download videos from various platforms\n• Access all download features\n• View download history\n• Manage settings and preferences",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            // End minimal home content
         }
     }
     
