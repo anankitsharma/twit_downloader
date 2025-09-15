@@ -1,0 +1,69 @@
+# Gradle files
+.gradle/
+build/
+!gradle-wrapper.jar
+
+# Local configuration file (SDK path, keystore, etc.)
+local.properties
+keystore.properties
+
+# Log files
+*.log
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetDropDown.xml
+.idea/shelf/
+
+# Android Studio captures
+captures/
+
+# NDK / CMake / External build
+.externalNativeBuild/
+.cxx/
+
+# Google Services (API keys, configs)
+# google-services.json
+
+# Freeline
+freeline.py
+freeline/
+freeline_project_description.json
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+# Others
+.DS_Store
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.so
+*.mp4
+*.zip
+*.tar.gz
+*.7z
+
+# Kotlin specific
+.kotlin/
+
+# Gradle caches and local builds
+**/build/
+out/
