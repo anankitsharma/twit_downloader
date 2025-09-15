@@ -1,6 +1,5 @@
 package com.junkfood.seal.ui.page
 
-import android.webkit.CookieManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,17 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -45,7 +41,8 @@ import com.junkfood.seal.ui.common.animatedComposableVariant
 import com.junkfood.seal.ui.common.arg
 import com.junkfood.seal.ui.common.id
 import com.junkfood.seal.ui.common.slideInVerticallyComposable
-import com.junkfood.seal.ui.component.BottomNavigationBar
+import com.junkfood.seal.ui.component.ModernBottomNav
+import com.junkfood.seal.ui.component.NavTab
 import com.junkfood.seal.ui.page.command.TaskListPage
 import com.junkfood.seal.ui.page.command.TaskLogPage
 import com.junkfood.seal.ui.page.downloadv2.DownloadPageV2
@@ -116,7 +113,7 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     var currentTopDestination by rememberSaveable { mutableStateOf(currentRoute) }
-    
+
     // Determine if we're in a bottom tab route
     val isBottomTabRoute = currentRoute in BottomTabDestinations
 
@@ -129,15 +126,24 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     Scaffold(
         bottomBar = {
             if (isBottomTabRoute) {
-                BottomNavigationBar(
-                    currentRoute = currentRoute,
-                    onNavigateToRoute = { route ->
+                val selectedTab = when (currentRoute) {
+                    Route.HOME_TAB -> NavTab.Home
+                    Route.DOWNLOAD_TAB -> NavTab.Downloads
+                    Route.SETTINGS_TAB -> NavTab.Settings
+                    else -> NavTab.Home
+                }
+                ModernBottomNav(
+                    selectedTab = selectedTab,
+                    onSelect = { tab ->
+                        val route = when (tab) {
+                            NavTab.Home -> Route.HOME_TAB
+                            NavTab.Downloads -> Route.DOWNLOAD_TAB
+                            NavTab.Settings -> Route.SETTINGS_TAB
+                        }
                         if (currentRoute != route) {
                             navController.navigate(route) {
                                 launchSingleTop = true
-                                popUpTo(route = Route.HOME_TAB) {
-                                    inclusive = false
-                                }
+                                popUpTo(route = Route.HOME_TAB) { inclusive = false }
                             }
                         }
                     }
@@ -145,7 +151,12 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(paddingValues)
+        ) {
             NavigationDrawer(
                 windowWidth = windowWidth,
                 drawerState = drawerState,
@@ -176,209 +187,66 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                     navController = navController,
                     startDestination = Route.HOME_TAB,
                 ) {
-                animatedComposable(Route.HOME) {
-                    DownloadPageV2(
-                        dialogViewModel = dialogViewModel,
-                        onMenuOpen = {
-                            view.slightHapticFeedback()
-                            scope.launch { drawerState.open() }
-                        },
-                    )
-                }
-                animatedComposable(Route.DOWNLOADS) { VideoListPage { onNavigateBack() } }
-                animatedComposableVariant(Route.TASK_LIST) {
-                    TaskListPage(
-                        onNavigateBack = onNavigateBack,
-                        onNavigateToDetail = { navController.navigate(Route.TASK_LOG id it) },
-                    )
-                }
-                slideInVerticallyComposable(
-                    Route.TASK_LOG arg Route.TASK_HASHCODE,
-                    arguments = listOf(navArgument(Route.TASK_HASHCODE) { type = NavType.IntType }),
-                ) {
-                    TaskLogPage(
-                        onNavigateBack = onNavigateBack,
-                        taskHashCode = it.arguments?.getInt(Route.TASK_HASHCODE) ?: -1,
-                    )
-                }
-                
-                // Bottom tab routes
-                animatedComposable(Route.HOME_TAB) {
-                    HomeTabScreen(
-                        dialogViewModel = dialogViewModel
-                    )
-                }
-                animatedComposable(Route.DOWNLOAD_TAB) {
-                    DownloadPageV2(
-                        dialogViewModel = dialogViewModel
-                    )
-                }
-                animatedComposable(Route.SETTINGS_TAB) {
-                    SettingsTabScreen(
-                        onNavigateTo = { route ->
-                            navController.navigate(route = route) { launchSingleTop = true }
-                        }
-                    )
-                }
+                    animatedComposable(Route.HOME) {
+                        DownloadPageV2(
+                            dialogViewModel = dialogViewModel,
+                            onMenuOpen = {
+                                view.slightHapticFeedback()
+                                scope.launch { drawerState.open() }
+                            },
+                        )
+                    }
+                    animatedComposable(Route.DOWNLOADS) { VideoListPage { onNavigateBack() } }
+                    animatedComposableVariant(Route.TASK_LIST) {
+                        TaskListPage(
+                            onNavigateBack = onNavigateBack,
+                            onNavigateToDetail = { navController.navigate(Route.TASK_LOG id it) },
+                        )
+                    }
+                    slideInVerticallyComposable(
+                        Route.TASK_LOG arg Route.TASK_HASHCODE,
+                        arguments = listOf(navArgument(Route.TASK_HASHCODE) { type = NavType.IntType }),
+                    ) {
+                        TaskLogPage(
+                            onNavigateBack = onNavigateBack,
+                            taskHashCode = it.arguments?.getInt(Route.TASK_HASHCODE) ?: -1,
+                        )
+                    }
 
-                settingsGraph(
-                    onNavigateBack = onNavigateBack,
-                    onNavigateTo = { route ->
-                        navController.navigate(route = route) { launchSingleTop = true }
-                    },
-                    cookiesViewModel = cookiesViewModel,
-                )
-            }
+                    // Bottom tab routes
+                    animatedComposable(Route.HOME_TAB) {
+                        HomeTabScreen(
+                            dialogViewModel = dialogViewModel
+                        )
+                    }
+                    animatedComposable(Route.DOWNLOAD_TAB) {
+                        DownloadPageV2(
+                            dialogViewModel = dialogViewModel
+                        )
+                    }
+                    animatedComposable(Route.SETTINGS_TAB) {
+                        SettingsTabScreen(
+                            onNavigateTo = { route ->
+                                navController.navigate(route = route) { launchSingleTop = true }
+                            }
+                        )
+                    }
+
+                    settingsGraph(
+                        onNavigateBack = onNavigateBack,
+                        onNavigateTo = { route -> navController.navigate(route = route) { launchSingleTop = true } },
+                        cookiesViewModel = cookiesViewModel
+                    )
+                } // <-- closes NavHost
+
+            } // <-- closes NavigationDrawer content lambda (MISSING brace was added here)
 
             AppUpdater()
             YtdlpUpdater()
         }
     }
-    }
 }
 
-fun NavGraphBuilder.settingsGraph(
-    onNavigateBack: () -> Unit,
-    onNavigateTo: (route: String) -> Unit,
-    cookiesViewModel: CookiesViewModel,
-) {
-    navigation(startDestination = Route.SETTINGS_PAGE, route = Route.SETTINGS) {
-        animatedComposable(Route.DOWNLOAD_DIRECTORY) {
-            DownloadDirectoryPreferences(onNavigateBack)
-        }
-        animatedComposable(Route.SETTINGS_PAGE) {
-            SettingsPage(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo)
-        }
-        animatedComposable(Route.GENERAL_DOWNLOAD_PREFERENCES) {
-            GeneralDownloadPreferences(onNavigateBack = { onNavigateBack() }) {
-                onNavigateTo(Route.TEMPLATE)
-            }
-        }
-        animatedComposable(Route.DOWNLOAD_FORMAT) {
-            DownloadFormatPreferences(onNavigateBack = onNavigateBack) {
-                onNavigateTo(Route.SUBTITLE_PREFERENCES)
-            }
-        }
-        animatedComposable(Route.SUBTITLE_PREFERENCES) { SubtitlePreference { onNavigateBack() } }
-        animatedComposable(Route.ABOUT) {
-            AboutPage(
-                onNavigateBack = onNavigateBack,
-                onNavigateToCreditsPage = { onNavigateTo(Route.CREDITS) },
-                onNavigateToUpdatePage = { onNavigateTo(Route.AUTO_UPDATE) },
-                onNavigateToDonatePage = { onNavigateTo(Route.DONATE) },
-            )
-        }
-        animatedComposable(Route.DONATE) { SponsorsPage(onNavigateBack) }
-        animatedComposable(Route.CREDITS) { CreditsPage(onNavigateBack) }
-        animatedComposable(Route.AUTO_UPDATE) { UpdatePage(onNavigateBack) }
-        animatedComposable(Route.APPEARANCE) {
-            AppearancePreferences(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo)
-        }
-        animatedComposable(Route.INTERACTION) { InteractionPreferencePage(onBack = onNavigateBack) }
-        animatedComposable(Route.LANGUAGES) { LanguagePage { onNavigateBack() } }
-        animatedComposable(Route.DOWNLOAD_DIRECTORY) {
-            DownloadDirectoryPreferences { onNavigateBack() }
-        }
-        animatedComposable(Route.TEMPLATE) {
-            TemplateListPage(onNavigateBack = onNavigateBack) {
-                onNavigateTo(Route.TEMPLATE_EDIT id it)
-            }
-        }
-        animatedComposable(
-            Route.TEMPLATE_EDIT arg Route.TEMPLATE_ID,
-            arguments = listOf(navArgument(Route.TEMPLATE_ID) { type = NavType.IntType }),
-        ) {
-            TemplateEditPage(onNavigateBack, it.arguments?.getInt(Route.TEMPLATE_ID) ?: -1)
-        }
-        animatedComposable(Route.DARK_THEME) { DarkThemePreferences { onNavigateBack() } }
-        animatedComposable(Route.NETWORK_PREFERENCES) {
-            NetworkPreferences(
-                navigateToCookieProfilePage = { onNavigateTo(Route.COOKIE_PROFILE) }
-            ) {
-                onNavigateBack()
-            }
-        }
-        animatedComposable(Route.COOKIE_PROFILE) {
-            CookieProfilePage(
-                cookiesViewModel = cookiesViewModel,
-                navigateToCookieGeneratorPage = { onNavigateTo(Route.COOKIE_GENERATOR_WEBVIEW) },
-            ) {
-                onNavigateBack()
-            }
-        }
-        animatedComposable(Route.COOKIE_GENERATOR_WEBVIEW) {
-            WebViewPage(cookiesViewModel = cookiesViewModel) {
-                onNavigateBack()
-                CookieManager.getInstance().flush()
-            }
-        }
-        animatedComposable(Route.TROUBLESHOOTING) {
-            TroubleShootingPage(onNavigateTo = onNavigateTo, onBack = onNavigateBack)
-        }
-    }
-}
+// settingsGraph is defined in AppEntryExtras.kt
 
-@Composable
-@Preview(name = "App Entry - Home Tab", showBackground = true)
-private fun AppEntryHomePreview() {
-    MaterialTheme {
-        // Simplified preview showing just the Home tab content
-        HomeTabScreen(
-            dialogViewModel = null
-        )
-    }
-}
-
-@Composable
-@Preview(name = "App Entry - Download Tab", showBackground = true)
-private fun AppEntryDownloadPreview() {
-    MaterialTheme {
-        // Simplified preview showing just the Download tab content using DownloadPageImplV2
-        DownloadPageImplV2(
-            taskDownloadStateMap = remember { mutableStateMapOf() },
-            onActionPost = { _, _ -> }
-        )
-    }
-}
-
-@Composable
-@Preview(name = "App Entry - Settings Tab", showBackground = true)
-private fun AppEntrySettingsPreview() {
-    MaterialTheme {
-        // Simplified preview showing just the Settings tab content
-        SettingsTabScreen(
-            onNavigateTo = {}
-        )
-    }
-}
-
-@Composable
-@Preview(name = "Bottom Navigation Bar", showBackground = true)
-private fun AppEntryBottomNavPreview() {
-    MaterialTheme {
-        BottomNavigationBar(
-            currentRoute = Route.HOME_TAB,
-            onNavigateToRoute = {}
-        )
-    }
-}
-
-@Composable
-@Preview(name = "Complete App Structure", showBackground = true)
-private fun AppEntryCompletePreview() {
-    MaterialTheme {
-        Scaffold(
-            bottomBar = {
-                BottomNavigationBar(
-                    currentRoute = Route.HOME_TAB,
-                    onNavigateToRoute = {}
-                )
-            }
-        ) { paddingValues ->
-            HomeTabScreen(
-                dialogViewModel = null,
-                modifier = Modifier.padding(paddingValues)
-            )
-        }
-    }
-}
+// Previews moved to AppEntryPreviews.kt

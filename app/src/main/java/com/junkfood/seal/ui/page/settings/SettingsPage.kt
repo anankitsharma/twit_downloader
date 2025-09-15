@@ -91,23 +91,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
-            // Dark Theme (top-level)
-            item {
-                val themeSubtitle = when (darkThemePreference.darkThemeValue) {
-                    FOLLOW_SYSTEM -> stringResource(R.string.follow_system)
-                    ON -> stringResource(R.string.on)
-                    OFF -> stringResource(R.string.off)
-                    else -> stringResource(R.string.follow_system)
-                }
-                SettingRow(
-                    icon = Icons.Rounded.Palette,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    title = stringResource(id = R.string.dark_theme),
-                    subtitle = themeSubtitle,
-                    onClick = { showThemeDialog = true }
-                )
-            }
+
             // Display Language (top-level)
             item {
                 val langSubtitle = "English" // Default fallback

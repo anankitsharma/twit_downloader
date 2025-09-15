@@ -3,6 +3,8 @@ package com.junkfood.seal.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -47,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -127,6 +130,115 @@ fun BottomNavBar(
                 )
             }
         }
+    }
+}
+
+// New modern API as requested
+enum class NavTab { Home, Downloads, Settings }
+
+@Composable
+fun ModernBottomNav(
+    selectedTab: NavTab,
+    onSelect: (NavTab) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth().navigationBarsPadding(),
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        tonalElevation = 4.dp,
+        shadowElevation = 6.dp,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ModernItem(
+                icon = Icons.Filled.Home,
+                label = "Home",
+                selected = selectedTab == NavTab.Home,
+                onClick = { onSelect(NavTab.Home) }
+            )
+
+            // Center Downloads - slightly raised and prominent
+            val raise by animateDpAsState(
+                targetValue = if (selectedTab == NavTab.Downloads) 8.dp else 6.dp,
+                animationSpec = tween(200, easing = FastOutSlowInEasing), label = "raise"
+            )
+            Box(modifier = Modifier.offset(y = -raise)) {
+                ModernItem(
+                    icon = Icons.Filled.Download,
+                    label = "Downloads",
+                    selected = selectedTab == NavTab.Downloads,
+                    onClick = { onSelect(NavTab.Downloads) },
+                    prominent = true
+                )
+            }
+
+            ModernItem(
+                icon = Icons.Filled.Settings,
+                label = "Settings",
+                selected = selectedTab == NavTab.Settings,
+                onClick = { onSelect(NavTab.Settings) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ModernItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    prominent: Boolean = false
+) {
+    val pillHeight = 44.dp
+    val pillShape = RoundedCornerShape(20.dp)
+    val targetBg = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else Color.Transparent
+    val bg by animateColorAsState(targetValue = targetBg, animationSpec = tween(200), label = "bg")
+    val tint by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(200), label = "tint"
+    )
+    val scale by animateFloatAsState(targetValue = if (selected && prominent) 1.06f else 1f, animationSpec = tween(200), label = "scale")
+
+    Row(
+        modifier = Modifier
+            .graphicsLayer { this.scaleX = scale; this.scaleY = scale }
+            .heightIn(min = 44.dp)
+            .clip(pillShape)
+            .background(bg)
+            .clickable(role = Role.Tab) { onClick() }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = icon, contentDescription = label, tint = tint)
+        AnimatedVisibility(
+            visible = selected,
+            enter = fadeIn() + slideInVertically { it / 2 },
+            exit = fadeOut()
+        ) {
+            Text(
+                text = label,
+                color = tint,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(name = "ModernBottomNav Preview")
+private fun ModernBottomNavPreview() {
+    var selected by remember { mutableStateOf(NavTab.Home) }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(24.dp))
+        ModernBottomNav(selectedTab = selected, onSelect = { selected = it })
+        val bottomPad = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        Spacer(modifier = Modifier.height(bottomPad))
     }
 }
 

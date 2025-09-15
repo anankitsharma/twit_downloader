@@ -1,6 +1,8 @@
 package com.junkfood.seal.ui.page
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,19 +16,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextField
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import com.junkfood.seal.ui.component.XHeaderScaffold
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -43,41 +47,51 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalConfiguration
-import android.content.res.Configuration
+import androidx.compose.ui.unit.dp
 import com.junkfood.seal.R
+import com.junkfood.seal.ui.component.XHeaderScaffold
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialog
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.Action
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
+import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel
+import com.junkfood.seal.ui.page.downloadv2.configure.FormatPage
+import com.junkfood.seal.ui.page.downloadv2.configure.PlaylistSelectionPage
+import com.junkfood.seal.ui.page.downloadv2.configure.Config
+import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState
 import com.junkfood.seal.ui.util.UrlRules
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTabScreen(
     modifier: Modifier = Modifier,
-    dialogViewModel: com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel? = null
+    dialogViewModel: DownloadDialogViewModel? = null
 ) {
     var urlText by remember { mutableStateOf("") }
     val clipboardManager = LocalClipboardManager.current
-    
+
     // Dialog state management (same as DownloadPageV2)
-    val sheetValue by dialogViewModel?.sheetValueFlow?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SheetValue.Hidden) }
-    val state by dialogViewModel?.sheetStateFlow?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SheetState.InputUrl) }
-    val selectionState = dialogViewModel?.selectionStateFlow?.collectAsStateWithLifecycle()?.value ?: com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState.Idle
-    
+    val sheetValue by dialogViewModel?.sheetValueFlow?.collectAsStateWithLifecycle()
+        ?: remember { mutableStateOf(DownloadDialogViewModel.SheetValue.Hidden) }
+    val state by dialogViewModel?.sheetStateFlow?.collectAsStateWithLifecycle()
+        ?: remember { mutableStateOf(DownloadDialogViewModel.SheetState.InputUrl) }
+    val selectionState =
+        dialogViewModel?.selectionStateFlow?.collectAsStateWithLifecycle()?.value
+            ?: SelectionState.Idle
+
     var showDialog by remember { mutableStateOf(false) }
     var showYouTubeWarning by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    
+
     // Listen for sheet value changes (same as DownloadPageV2)
     LaunchedEffect(sheetValue) {
-        if (sheetValue == com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SheetValue.Expanded) {
+        if (sheetValue == DownloadDialogViewModel.SheetValue.Expanded) {
             showDialog = true
         } else {
-            launch { sheetState.hide() }.invokeOnCompletion { showDialog = false }
+            // hide is suspendable — call directly in this coroutine scope, then update flag
+            sheetState.hide()
+            showDialog = false
         }
     }
 
@@ -86,63 +100,87 @@ fun HomeTabScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp) // increased spacing for modern look
         ) {
-            // URL Input Section
+            // Modern URL Input Card (design-only changes)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Soft label above the field
+                    Text(
+                        text = "Enter Post Link",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    // Rounded filled text field
                     TextField(
                         value = urlText,
                         onValueChange = { urlText = it },
-                        placeholder = { Text("Enter Post Link") },
+                        placeholder = { Text("https://...") },
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
                         trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    val clipboardText = clipboardManager.getText()?.toString() ?: ""
-                                    urlText = clipboardText
-                                    if (clipboardText.isNotEmpty()) {
-                                        if (UrlRules.isBlocked(clipboardText)) {
-                                            showYouTubeWarning = true
-                                        } else {
-                                            dialogViewModel?.postAction(Action.ShowSheet(listOf(clipboardText)))
-                                        }
+                            IconButton(onClick = {
+                                val clipboardText = clipboardManager.getText()?.toString() ?: ""
+                                urlText = clipboardText
+                                if (clipboardText.isNotEmpty()) {
+                                    if (UrlRules.isBlocked(clipboardText)) {
+                                        showYouTubeWarning = true
+                                    } else {
+                                        dialogViewModel?.postAction(
+                                            Action.ShowSheet(listOf(clipboardText))
+                                        )
                                     }
                                 }
-                            ) {
+                            }) {
                                 Icon(
-                                    Icons.Outlined.ContentPaste,
-                                    contentDescription = "Paste from clipboard"
+                                    imageVector = Icons.Outlined.ContentPaste,
+                                    contentDescription = "Paste from clipboard",
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
-                        }
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
             }
 
-            // Action Buttons
+            // Modern Action Buttons Card (design-only changes)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         FilledTonalButton(
                             onClick = {
@@ -156,22 +194,25 @@ fun HomeTabScreen(
                                     }
                                 }
                             },
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors()
                         ) {
                             Icon(
-                                Icons.Outlined.ContentPaste,
+                                imageVector = Icons.Outlined.ContentPaste,
                                 contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Paste",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                style = MaterialTheme.typography.labelLarge
                             )
                         }
-                        
+
                         Button(
                             onClick = {
                                 if (urlText.isNotEmpty()) {
@@ -184,27 +225,37 @@ fun HomeTabScreen(
                                     dialogViewModel?.postAction(Action.ShowSheet())
                                 }
                             },
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
-                            enabled = true // Always enabled, will use URL if available
+                            enabled = true
                         ) {
                             Icon(
-                                Icons.Outlined.FileDownload,
+                                imageVector = Icons.Outlined.FileDownload,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Download",
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                             )
                         }
                     }
+
+                    // helper/subtext + spacing
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Tip: paste a post link or press Download to analyze clipboard automatically.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
                 }
             }
 
@@ -220,35 +271,35 @@ fun HomeTabScreen(
             confirmButton = { TextButton(onClick = { showYouTubeWarning = false }) { Text(text = stringResource(id = android.R.string.ok)) } }
         )
     }
-    
+
     // Dialog rendering (same as DownloadPageV2)
     if (showDialog && dialogViewModel != null) {
         DownloadDialog(
             state = state,
             sheetState = sheetState,
-            config = com.junkfood.seal.ui.page.downloadv2.configure.Config(),
+            config = Config(),
             preferences = com.junkfood.seal.util.DownloadUtil.DownloadPreferences.createFromPreferences(),
             onPreferencesUpdate = { /* preferences update */ },
             onActionPost = { dialogViewModel.postAction(it) },
         )
     }
-    
+
     // Selection state handling (same as DownloadPageV2)
     when (selectionState) {
         is com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState.FormatSelection ->
-            com.junkfood.seal.ui.page.downloadv2.configure.FormatPage(
+            FormatPage(
                 state = selectionState,
                 onDismissRequest = { dialogViewModel?.postAction(Action.Reset) },
             )
 
         is com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState.PlaylistSelection -> {
-            com.junkfood.seal.ui.page.downloadv2.configure.PlaylistSelectionPage(
+            PlaylistSelectionPage(
                 state = selectionState,
                 onDismissRequest = { dialogViewModel?.postAction(Action.Reset) },
             )
         }
 
-        com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState.Idle -> {}
+        SelectionState.Idle -> {}
     }
 }
 
