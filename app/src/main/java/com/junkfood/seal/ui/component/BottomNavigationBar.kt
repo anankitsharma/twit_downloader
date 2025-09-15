@@ -38,10 +38,10 @@ fun BottomNavigationBar(
             icon = { 
                 Icon(
                     imageVector = Icons.Filled.Download,
-                    contentDescription = stringResource(R.string.download)
+                    contentDescription = stringResource(R.string.downloads_history)
                 )
             },
-            label = { Text(stringResource(R.string.download)) },
+            label = { Text(stringResource(R.string.downloads_history)) },
             selected = currentRoute == Route.DOWNLOAD_TAB,
             onClick = { onNavigateToRoute(Route.DOWNLOAD_TAB) }
         )

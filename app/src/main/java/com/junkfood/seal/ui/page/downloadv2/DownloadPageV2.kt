@@ -2,9 +2,7 @@ package com.junkfood.seal.ui.page.downloadv2
 
 import android.content.Intent
 import android.content.res.Configuration
-import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateTo
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.horizontalScroll
@@ -69,7 +67,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -310,7 +307,6 @@ private operator fun PaddingValues.plus(other: PaddingValues): PaddingValues {
     )
 }
 
-private const val HeaderSpacingDp = 28
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -355,35 +351,13 @@ fun DownloadPageImplV2(
     ) { windowInsetsPadding ->
         val lazyListState = rememberLazyGridState()
         val windowWidthSizeClass = LocalWindowWidthState.current
-        val spacerHeight =
-            with(LocalDensity.current) {
-                if (windowWidthSizeClass != WindowWidthSizeClass.Compact) 0f
-                else HeaderSpacingDp.dp.toPx()
-            }
-        var headerOffset by remember { mutableFloatStateOf(spacerHeight) }
         var isGridView by rememberSaveable { mutableStateOf(true) }
 
         Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .then(
-                        if (windowWidthSizeClass != WindowWidthSizeClass.Compact) Modifier
-                        else
-                            Modifier.nestedScroll(
-                                connection =
-                                    TopBarNestedScrollConnection(
-                                        maxOffset = spacerHeight,
-                                        flingAnimationSpec = rememberSplineBasedDecay(),
-                                        offset = { headerOffset },
-                                        onOffsetUpdate = { headerOffset = it },
-                                    )
-                            )
-                    )
+            modifier = Modifier.fillMaxSize()
         ) {
             CompositionLocalProvider(LocalOverscrollFactory provides null) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.height(with(LocalDensity.current) { headerOffset.toDp() }))
-                    Header(onMenuOpen = onMenuOpen, modifier = Modifier.padding(horizontal = 16.dp))
                     SelectionGroupRow(
                         modifier =
                             Modifier.horizontalScroll(rememberScrollState())
@@ -402,14 +376,6 @@ fun DownloadPageImplV2(
                                 onClick = {
                                     if (activeFilter == filter) {
                                         scope.launch { lazyListState.animateScrollToItem(0) }
-                                        scope.launch {
-                                            val initialValue = headerOffset
-                                            AnimationState(initialValue = initialValue).animateTo(
-                                                spacerHeight
-                                            ) {
-                                                headerOffset = value
-                                            }
-                                        }
                                     } else {
                                         activeFilter = filter
                                     }
@@ -420,9 +386,6 @@ fun DownloadPageImplV2(
                         }
                     }
                     Spacer(Modifier.height(8.dp))
-                    if (headerOffset <= 0.1f && spacerHeight > 0f) {
-                        HorizontalDivider(thickness = Dp.Hairline)
-                    }
                 }
 
                 LazyVerticalGrid(

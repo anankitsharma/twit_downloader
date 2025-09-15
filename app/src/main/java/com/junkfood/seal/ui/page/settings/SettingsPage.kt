@@ -187,15 +187,6 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
             }
             item {
                 SettingItem(
-                    title = stringResource(id = R.string.custom_command),
-                    description = stringResource(id = R.string.custom_command_desc),
-                    icon = Icons.Rounded.Terminal,
-                ) {
-                    onNavigateTo(Route.TEMPLATE)
-                }
-            }
-            item {
-                SettingItem(
                     title = stringResource(id = R.string.cookies),
                     description = stringResource(id = R.string.cookies_desc),
                     icon = Icons.Rounded.Cookie,
@@ -244,8 +235,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview(name = "Light Theme", uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "Dark Theme", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Settings - Light", uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
+@Preview(name = "Settings - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 private fun SettingsPagePreview() {
     MaterialTheme {
         Scaffold(
@@ -291,13 +282,6 @@ private fun SettingsPagePreview() {
                 }
                 item {
                     SettingItem(
-                        title = "Custom Command",
-                        description = "Custom yt-dlp commands",
-                        icon = Icons.Rounded.Terminal,
-                    ) {}
-                }
-                item {
-                    SettingItem(
                         title = "Cookies",
                         description = "Cookie management",
                         icon = Icons.Rounded.Cookie,
@@ -315,13 +299,6 @@ private fun SettingsPagePreview() {
                         title = "Interface and Interaction",
                         description = "UI and interaction preferences",
                         icon = Icons.Rounded.ViewComfy,
-                    ) {}
-                }
-                item {
-                    SettingItem(
-                        title = "Troubleshooting",
-                        description = "Bug reporting and diagnostics",
-                        icon = Icons.Rounded.BugReport,
                     ) {}
                 }
                 item {

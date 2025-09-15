@@ -54,7 +54,9 @@ fun DownloadTabScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(" ") },
+                title = { 
+                    Text(stringResource(R.string.downloads_history))
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
