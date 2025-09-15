@@ -15,6 +15,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -107,31 +108,14 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 showBatteryHint = !pm.isIgnoringBatteryOptimizations(context.packageName)
             }
         }
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
     val showSponsorMessage by SHOW_SPONSOR_MSG.intState
 
     LaunchedEffect(Unit) { SHOW_SPONSOR_MSG.updateInt(showSponsorMessage + 1) }
 
-    val typography = MaterialTheme.typography
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            val overrideTypography =
-                remember(typography) { typography.copy(headlineMedium = typography.displaySmall) }
-
-            MaterialTheme(typography = overrideTypography) {
-                LargeTopAppBar(
-                    title = { Text(text = stringResource(id = R.string.settings)) },
-                    navigationIcon = { BackButton(onNavigateBack) },
-                    scrollBehavior = scrollBehavior,
-                    expandedHeight = TopAppBarDefaults.LargeAppBarExpandedHeight + 24.dp,
-                )
-            }
-        },
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp)
     ) {
-        LazyColumn(modifier = Modifier, contentPadding = it) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 item {
                     AnimatedVisibility(
@@ -256,7 +240,6 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                 }
             }
         }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
