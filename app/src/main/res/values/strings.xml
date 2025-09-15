@@ -76,6 +76,8 @@
     <string name="not_convert">Unconverted</string>
     <string name="convert_to">Convert to %1$s</string>
     <string name="format">Format</string>
+    <string name="suggested_format">Suggested format</string>
+    <string name="formats">Formats</string>
     <string name="convert_audio_format_desc">Re-encoding audio files will cause loss in audio quality and increase in file size.</string>
     <string name="video_quality">Video quality</string>
     <string name="best_quality">Best quality</string>

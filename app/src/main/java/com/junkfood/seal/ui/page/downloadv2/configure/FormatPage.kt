@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -409,41 +410,11 @@ private fun FormatPageImpl(
                 },
             )
         },
-        floatingActionButton = {
-            val isFormatSelected = isSuggestedFormatSelected || formatList.isNotEmpty()
-            if (isFormatSelected) {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        onDownloadPressed(
-                            FormatConfig(
-                                formatList = formatList,
-                                videoClips =
-                                    if (isClippingVideo) listOf(VideoClip(videoClipDuration))
-                                    else emptyList(),
-                                splitByChapter = isSplittingVideo,
-                                newTitle = videoTitle,
-                                selectedSubtitles = selectedSubtitles,
-                                selectedAutoCaptions = selectedAutoCaptions,
-                            )
-                        )
-                    },
-                    modifier = Modifier.padding(12.dp),
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Outlined.FileDownload,
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    },
-                    text = { Text(stringResource(R.string.start_download)) },
-                    expanded = isFabExpanded,
-                )
-            }
-        },
+        floatingActionButton = {},
         floatingActionButtonPosition = FabPosition.End,
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues).navigationBarsPadding(),
             state = lazyListState,
             verticalArrangement = Arrangement.spacedBy(0.dp),
             contentPadding = PaddingValues(bottom = 12.dp),
@@ -533,7 +504,7 @@ private fun FormatPageImpl(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 12.dp, bottom = 4.dp).padding(horizontal = 12.dp),
                     ) {
-                        FormatSubtitle(text = stringResource(R.string.suggested))
+                        FormatSubtitle(text = stringResource(R.string.suggested_format))
                     }
                 }
                 item {
@@ -572,7 +543,7 @@ private fun FormatPageImpl(
                         modifier = Modifier.padding(top = 16.dp).padding(horizontal = 12.dp),
                     ) {
                         FormatSubtitle(
-                            text = stringResource(R.string.video),
+                            text = stringResource(R.string.formats),
                             modifier = Modifier.weight(1f).padding(vertical = 4.dp),
                         )
                         ClickableTextAction(
