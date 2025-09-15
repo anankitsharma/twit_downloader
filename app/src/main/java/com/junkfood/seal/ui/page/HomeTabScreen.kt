@@ -51,6 +51,9 @@ import android.content.res.Configuration
 import com.junkfood.seal.R
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialog
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.Action
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import com.junkfood.seal.ui.util.UrlRules
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +71,7 @@ fun HomeTabScreen(
     val selectionState = dialogViewModel?.selectionStateFlow?.collectAsStateWithLifecycle()?.value ?: com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState.Idle
     
     var showDialog by remember { mutableStateOf(false) }
+    var showYouTubeWarning by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
     // Listen for sheet value changes (same as DownloadPageV2)
@@ -129,7 +133,11 @@ fun HomeTabScreen(
                                     val clipboardText = clipboardManager.getText()?.toString() ?: ""
                                     urlText = clipboardText
                                     if (clipboardText.isNotEmpty()) {
-                                        dialogViewModel?.postAction(Action.ShowSheet(listOf(clipboardText)))
+                                        if (UrlRules.isBlocked(clipboardText)) {
+                                            showYouTubeWarning = true
+                                        } else {
+                                            dialogViewModel?.postAction(Action.ShowSheet(listOf(clipboardText)))
+                                        }
                                     }
                                 }
                             ) {
@@ -162,7 +170,11 @@ fun HomeTabScreen(
                                 val clipboardText = clipboardManager.getText()?.toString() ?: ""
                                 urlText = clipboardText
                                 if (clipboardText.isNotEmpty()) {
-                                    dialogViewModel?.postAction(Action.ShowSheet(listOf(clipboardText)))
+                                    if (UrlRules.isBlocked(clipboardText)) {
+                                        showYouTubeWarning = true
+                                    } else {
+                                        dialogViewModel?.postAction(Action.ShowSheet(listOf(clipboardText)))
+                                    }
                                 }
                             },
                             modifier = Modifier.weight(1f).height(48.dp),
@@ -184,7 +196,11 @@ fun HomeTabScreen(
                         Button(
                             onClick = {
                                 if (urlText.isNotEmpty()) {
-                                    dialogViewModel?.postAction(Action.ShowSheet(listOf(urlText)))
+                                    if (UrlRules.isBlocked(urlText)) {
+                                        showYouTubeWarning = true
+                                    } else {
+                                        dialogViewModel?.postAction(Action.ShowSheet(listOf(urlText)))
+                                    }
                                 } else {
                                     dialogViewModel?.postAction(Action.ShowSheet())
                                 }
@@ -215,6 +231,15 @@ fun HomeTabScreen(
 
             // End minimal home content
         }
+    }
+
+    if (showYouTubeWarning) {
+        AlertDialog(
+            onDismissRequest = { showYouTubeWarning = false },
+            title = { Text(stringResource(R.string.warning)) },
+            text = { Text(stringResource(R.string.youtube_block_msg)) },
+            confirmButton = { TextButton(onClick = { showYouTubeWarning = false }) { Text(text = stringResource(id = android.R.string.ok)) } }
+        )
     }
     
     // Dialog rendering (same as DownloadPageV2)

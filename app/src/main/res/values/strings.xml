@@ -88,6 +88,8 @@
     <string name="video_format">Video format</string>
     <string name="convert_audio">Convert</string>
     <string name="start_download">Download</string>
+    <string name="warning">Warning</string>
+    <string name="youtube_block_msg">Due to legal restrictions, videos on YouTube cannot be downloaded.</string>
     <string name="close">Close</string>
     <string name="close_never_show_again">Don\'t show up again</string>
     <string name="user_guide">User guide</string>

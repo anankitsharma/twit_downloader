@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.junkfood.seal.ui.util.UrlRules
 
 private const val TAG = "DownloadDialogViewModel"
 
@@ -210,6 +211,13 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
     private fun showDialog(action: Action.ShowSheet) {
         val urlList = action.urlList
         if (!urlList.isNullOrEmpty()) {
+            // Block if any URL is from a restricted host (e.g., YouTube)
+            if (urlList.any { UrlRules.isBlocked(it) }) {
+                // Instead of opening the sheet, surface an error state
+                mSheetStateFlow.update { SheetState.Error(action, throwable = IllegalStateException("Blocked source")) }
+                mSheetValueFlow.update { SheetValue.Hidden }
+                return
+            }
             mSheetStateFlow.update { SheetState.Configure(urlList) }
         } else {
             mSheetStateFlow.update { SheetState.InputUrl }
