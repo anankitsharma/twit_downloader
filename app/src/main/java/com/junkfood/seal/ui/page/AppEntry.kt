@@ -175,13 +175,7 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                 if (state.downloadState is com.junkfood.seal.download.Task.DownloadState.Completed && !seenCompletedIds.contains(id)) {
                     seenCompletedIds.add(id)
                     unseenCompleted += 1
-                    val title = state.viewState.title
-                    bannerText = if (title.isNotBlank()) {
-                        val short = if (title.length > 30) title.take(30) + "…" else title
-                        "✅ Download completed: ${'$'}short.mp4"
-                    } else {
-                        "✅ Download completed"
-                    }
+                    bannerText = "✅ Download completed"
                     showBanner = true
                 }
                 if (state.downloadState is com.junkfood.seal.download.Task.DownloadState.Error && !seenCompletedIds.contains(id)) {

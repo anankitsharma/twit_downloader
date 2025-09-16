@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
@@ -41,7 +42,9 @@ fun FloatingToast(
     AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
         val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         Box(
-            modifier = Modifier.fillMaxWidth().padding(bottom = navBottom + bottomPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = navBottom + bottomPadding),
             contentAlignment = Alignment.BottomCenter
         ) {
             Surface(
@@ -74,12 +77,14 @@ fun BottomBanner(
     onClick: () -> Unit,
     autoHideMillis: Long = 3500L,
     onHide: () -> Unit,
-    bottomPadding: Dp = 16.dp,
+    bottomPadding: Dp = 84.dp,
 ) {
     AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
         val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = navBottom + bottomPadding),
             contentAlignment = Alignment.BottomCenter
         ) {
             Surface(
@@ -89,7 +94,6 @@ fun BottomBanner(
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .padding(bottom = navBottom + bottomPadding, top = 12.dp)
                     .clickable { onClick() }
             ) {
                 Text(
