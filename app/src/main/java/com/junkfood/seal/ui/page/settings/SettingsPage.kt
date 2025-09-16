@@ -104,15 +104,15 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     onClick = { onNavigateTo(Route.LANGUAGES) }
                 )
             }
-            // Display settings (optional link to full appearance page if needed)
+            // Dark theme (top-level; replaces nested display/appearance page)
             item {
                 SettingRow(
                     icon = Icons.Rounded.Palette,
                     iconTint = MaterialTheme.colorScheme.primary,
                     badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    title = stringResource(id = R.string.display_settings),
-                    subtitle = stringResource(id = R.string.look_and_feel),
-                    onClick = { onNavigateTo(Route.APPEARANCE) }
+                    title = stringResource(id = R.string.dark_theme),
+                    subtitle = darkThemePreference.getDarkThemeDesc(),
+                    onClick = { showThemeDialog = true }
                 )
             }
             // Login X -> open existing cookies page for now
