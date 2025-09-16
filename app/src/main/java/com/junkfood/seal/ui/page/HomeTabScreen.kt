@@ -68,6 +68,7 @@ import com.junkfood.seal.ui.page.downloadv2.ListItemStateText
 import com.junkfood.seal.ui.page.downloadv2.VideoListItem
 import org.koin.compose.koinInject
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.junkfood.seal.util.matchUrlFromSharedText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +82,7 @@ fun HomeTabScreen(
     val downloader: DownloaderV2 = koinInject()
     val taskStateMap = downloader.getTaskStateMap()
     var inlineUrl by rememberSaveable { mutableStateOf("") }
+    var hasPastedFromClipboard by rememberSaveable { mutableStateOf(false) }
 
     // Dialog state management (same as DownloadPageV2)
     val sheetValue by dialogViewModel?.sheetValueFlow?.collectAsStateWithLifecycle()
@@ -94,6 +96,18 @@ fun HomeTabScreen(
     var showDialog by remember { mutableStateOf(false) }
     var showYouTubeWarning by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // One-time auto-paste from clipboard on first open if the clipboard contains a URL
+    LaunchedEffect(Unit) {
+        if (!hasPastedFromClipboard && urlText.isEmpty()) {
+            val clip = clipboardManager.getText()?.toString() ?: ""
+            val matched = matchUrlFromSharedText(clip)
+            if (!matched.isNullOrEmpty() && !UrlRules.isBlocked(matched)) {
+                urlText = matched
+            }
+            hasPastedFromClipboard = true
+        }
+    }
 
     // Listen for sheet value changes (same as DownloadPageV2)
     LaunchedEffect(sheetValue) {
