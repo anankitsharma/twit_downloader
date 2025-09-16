@@ -44,7 +44,7 @@ android {
     buildFeatures { buildConfig = true }
 
     defaultConfig {
-        applicationId = "com.junkfood.seal"
+        applicationId = "com.rit.twitdownloader"
         minSdk = 24
         targetSdk = 35
         versionCode = 200_000_150
@@ -164,7 +164,7 @@ android {
     
     androidResources { generateLocaleConfig = true }
 
-    namespace = "com.junkfood.seal"
+    namespace = "com.rit.twitdownloader"
 }
 
 ktfmt { kotlinLangStyle() }
