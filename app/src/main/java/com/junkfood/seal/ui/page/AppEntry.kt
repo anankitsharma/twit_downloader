@@ -52,6 +52,10 @@ import com.junkfood.seal.ui.common.id
 import com.junkfood.seal.ui.common.slideInVerticallyComposable
 import com.junkfood.seal.ui.component.ModernBottomNav
 import com.junkfood.seal.ui.component.NavTab
+import com.junkfood.seal.ui.component.FloatingToast
+import com.junkfood.seal.ui.component.BottomBanner
+import com.junkfood.seal.download.DownloaderV2
+import org.koin.compose.koinInject
 import com.junkfood.seal.ui.page.command.TaskListPage
 import com.junkfood.seal.ui.page.command.TaskLogPage
 import com.junkfood.seal.ui.page.downloadv2.DownloadPageV2
@@ -100,6 +104,7 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     val windowWidth = LocalWindowWidthState.current
     val sheetState by dialogViewModel.sheetStateFlow.collectAsStateWithLifecycle()
     val cookiesViewModel: CookiesViewModel = koinViewModel()
+    val downloader: DownloaderV2 = koinInject()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val versionReport = App.packageInfo.versionName.toString()
@@ -142,6 +147,53 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
         }
     }
 
+    var showStartedToast by remember { mutableStateOf(false) }
+    var showBanner by remember { mutableStateOf(false) }
+    var bannerText by remember { mutableStateOf("") }
+    var unseenCompleted by remember { mutableStateOf(0) }
+    val seenCompletedIds = remember { mutableSetOf<String>() }
+    val seenStartedIds = remember { mutableSetOf<String>() }
+    val seenEnqueuedIds = remember { mutableSetOf<String>() }
+
+    // Observe task state map to detect starts/completions/errors
+    LaunchedEffect(Unit) {
+        // naive polling via snapshot – replace with a proper flow if exposed later
+        while (true) {
+            val states = downloader.getTaskStateMap().toMap()
+            // Increment badge only when a brand new task is observed
+            states.forEach { (task, state) ->
+                val id = task.id
+                if (!seenEnqueuedIds.contains(id) && state.downloadState is com.junkfood.seal.download.Task.DownloadState.Idle) {
+                    seenEnqueuedIds.add(id) // brand new item observed
+                    // no badge increment here; only on completion
+                }
+                // Only show start when task first transitions to Running (not on FetchingInfo retries)
+                if (!seenStartedIds.contains(id) && state.downloadState is com.junkfood.seal.download.Task.DownloadState.Running) {
+                    seenStartedIds.add(id)
+                    showStartedToast = true
+                }
+                if (state.downloadState is com.junkfood.seal.download.Task.DownloadState.Completed && !seenCompletedIds.contains(id)) {
+                    seenCompletedIds.add(id)
+                    unseenCompleted += 1
+                    val title = state.viewState.title
+                    bannerText = if (title.isNotBlank()) {
+                        val short = if (title.length > 30) title.take(30) + "…" else title
+                        "✅ Download completed: ${'$'}short.mp4"
+                    } else {
+                        "✅ Download completed"
+                    }
+                    showBanner = true
+                }
+                if (state.downloadState is com.junkfood.seal.download.Task.DownloadState.Error && !seenCompletedIds.contains(id)) {
+                    seenCompletedIds.add(id) // prevent repeat
+                    bannerText = "❌ Download failed"
+                    showBanner = true
+                }
+            }
+            kotlinx.coroutines.delay(400)
+        }
+    }
+
     Scaffold(
         bottomBar = {
             if (isBottomTabRoute) {
@@ -153,6 +205,7 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                 }
                 ModernBottomNav(
                     selectedTab = selectedTab,
+                    downloadsBadgeCount = unseenCompleted,
                     onSelect = { tab ->
                         val route = when (tab) {
                             NavTab.Home -> Route.HOME_TAB
@@ -164,6 +217,7 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                                 launchSingleTop = true
                                 popUpTo(route = Route.HOME_TAB) { inclusive = false }
                             }
+                            if (tab == NavTab.Downloads) unseenCompleted = 0
                         }
                     }
                 )
@@ -273,6 +327,28 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                 }
 
             } // <-- closes NavigationDrawer content lambda (MISSING brace was added here)
+
+            // Global overlays
+            Box(modifier = Modifier.fillMaxSize()) {
+                FloatingToast(
+                    message = "⚡ Download started...",
+                    visible = showStartedToast,
+                    onHide = { showStartedToast = false },
+                    bottomPadding = 84.dp
+                )
+                BottomBanner(
+                    message = bannerText,
+                    visible = showBanner,
+                    onClick = {
+                        showBanner = false
+                        if (currentRoute != Route.DOWNLOAD_TAB) {
+                            navController.navigate(Route.DOWNLOAD_TAB) { launchSingleTop = true }
+                            unseenCompleted = 0
+                        }
+                    },
+                    onHide = { showBanner = false }
+                )
+            }
 
             AppUpdater()
             YtdlpUpdater()
