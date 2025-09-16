@@ -207,10 +207,6 @@ fun DownloadPageV2(
         DownloadPageImplV2(
             modifier = Modifier,
             taskDownloadStateMap = downloader.getTaskStateMap(),
-            downloadCallback = {
-                view.slightHapticFeedback()
-                dialogViewModel.postAction(Action.ShowSheet())
-            },
             onMenuOpen = onMenuOpen,
         ) { task, action ->
             view.slightHapticFeedback()
@@ -315,7 +311,6 @@ private operator fun PaddingValues.plus(other: PaddingValues): PaddingValues {
 fun DownloadPageImplV2(
     modifier: Modifier = Modifier,
     taskDownloadStateMap: SnapshotStateMap<Task, Task.State>,
-    downloadCallback: () -> Unit = {},
     onMenuOpen: (() -> Unit) = {},
     onActionPost: (Task, UiAction) -> Unit,
 ) {
@@ -349,7 +344,7 @@ fun DownloadPageImplV2(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
-        floatingActionButton = { FABs(modifier = Modifier, downloadCallback = downloadCallback) },
+        floatingActionButton = {},
     ) { windowInsetsPadding ->
         val lazyListState = rememberLazyGridState()
         val windowWidthSizeClass = LocalWindowWidthState.current
@@ -547,48 +542,7 @@ private fun HeaderExpanded(modifier: Modifier = Modifier) {
     Spacer(Modifier.height(4.dp))
 }
 
-@Composable
-fun FABs(modifier: Modifier = Modifier, downloadCallback: () -> Unit = {}) {
-    val expanded = LocalWindowWidthState.current != WindowWidthSizeClass.Compact
-    Column(
-        modifier = modifier
-            .padding(6.dp)
-            .padding(bottom = 80.dp), // Add padding to avoid bottom navigation bar
-        horizontalAlignment = Alignment.End
-    ) {
-        FloatingActionButton(
-            onClick = downloadCallback,
-            content = {
-                if (expanded) {
-                    Row(
-                        modifier = Modifier.widthIn(min = 80.dp).padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(Icons.Outlined.FileDownload, contentDescription = null)
-                        Spacer(Modifier.width(12.dp))
-                        Text(stringResource(R.string.download))
-                    }
-                } else {
-                    Icon(
-                        Icons.Outlined.FileDownload,
-                        contentDescription = stringResource(R.string.download),
-                    )
-                }
-            },
-            modifier = Modifier.padding(vertical = 12.dp),
-        )
-    }
-}
-
-@Composable
-@Preview(name = "FABs Preview")
-private fun FABsPreview() {
-    MaterialTheme {
-        FABs(
-            downloadCallback = {}
-        )
-    }
-}
+// FAB removed: downloads are initiated from Home screen.
 
 @Composable
 @Preview

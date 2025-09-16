@@ -62,15 +62,25 @@ import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.Se
 import com.junkfood.seal.ui.util.UrlRules
 import androidx.compose.ui.graphics.Color
 import com.junkfood.seal.util.DownloadUtil
+import com.junkfood.seal.download.DownloaderV2
+import com.junkfood.seal.download.Task
+import com.junkfood.seal.ui.page.downloadv2.ListItemStateText
+import com.junkfood.seal.ui.page.downloadv2.VideoListItem
+import org.koin.compose.koinInject
+import androidx.compose.runtime.saveable.rememberSaveable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTabScreen(
     modifier: Modifier = Modifier,
-    dialogViewModel: DownloadDialogViewModel? = null
+    dialogViewModel: DownloadDialogViewModel? = null,
+    onOpenDownloads: () -> Unit = {}
 ) {
     var urlText by remember { mutableStateOf("") }
     val clipboardManager = LocalClipboardManager.current
+    val downloader: DownloaderV2 = koinInject()
+    val taskStateMap = downloader.getTaskStateMap()
+    var inlineUrl by rememberSaveable { mutableStateOf("") }
 
     // Dialog state management (same as DownloadPageV2)
     val sheetValue by dialogViewModel?.sheetValueFlow?.collectAsStateWithLifecycle()
@@ -215,6 +225,7 @@ fun HomeTabScreen(
                                         dialogViewModel?.postAction(
                                             Action.DownloadWithPreset(urlList = listOf(urlText), preferences = prefs)
                                         )
+                                        inlineUrl = urlText
                                     }
                                 }
                             },
@@ -253,6 +264,29 @@ fun HomeTabScreen(
             }
 
             // End minimal home content
+            // Inline single active download card below controls
+            val inlineEntry: Map.Entry<Task, Task.State>? = taskStateMap.entries.firstOrNull { it.key.url == inlineUrl }
+            if (inlineEntry != null) {
+                val (task, state) = inlineEntry
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                ) {
+                    Column(Modifier.padding(12.dp)) {
+                        VideoListItem(
+                            modifier = Modifier.fillMaxWidth(),
+                            viewState = state.viewState,
+                            stateIndicator = {
+                                ListItemStateText(modifier = Modifier, downloadState = state.downloadState)
+                            }
+                        ) {
+                            onOpenDownloads()
+                        }
+                    }
+                }
+            }
         }
     }
 
