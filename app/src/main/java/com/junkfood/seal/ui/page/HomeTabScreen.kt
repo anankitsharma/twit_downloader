@@ -61,6 +61,7 @@ import com.junkfood.seal.ui.page.downloadv2.configure.Config
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState
 import com.junkfood.seal.ui.util.UrlRules
 import androidx.compose.ui.graphics.Color
+import com.junkfood.seal.util.DownloadUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,14 +136,8 @@ fun HomeTabScreen(
                             IconButton(onClick = {
                                 val clipboardText = clipboardManager.getText()?.toString() ?: ""
                                 urlText = clipboardText
-                                if (clipboardText.isNotEmpty()) {
-                                    if (UrlRules.isBlocked(clipboardText)) {
-                                        showYouTubeWarning = true
-                                    } else {
-                                        dialogViewModel?.postAction(
-                                            Action.ShowSheet(listOf(clipboardText))
-                                        )
-                                    }
+                                if (clipboardText.isNotEmpty() && UrlRules.isBlocked(clipboardText)) {
+                                    showYouTubeWarning = true
                                 }
                             }) {
                                 Icon(
@@ -186,12 +181,8 @@ fun HomeTabScreen(
                             onClick = {
                                 val clipboardText = clipboardManager.getText()?.toString() ?: ""
                                 urlText = clipboardText
-                                if (clipboardText.isNotEmpty()) {
-                                    if (UrlRules.isBlocked(clipboardText)) {
-                                        showYouTubeWarning = true
-                                    } else {
-                                        dialogViewModel?.postAction(Action.ShowSheet(listOf(clipboardText)))
-                                    }
+                                if (clipboardText.isNotEmpty() && UrlRules.isBlocked(clipboardText)) {
+                                    showYouTubeWarning = true
                                 }
                             },
                             modifier = Modifier
@@ -219,10 +210,12 @@ fun HomeTabScreen(
                                     if (UrlRules.isBlocked(urlText)) {
                                         showYouTubeWarning = true
                                     } else {
-                                        dialogViewModel?.postAction(Action.ShowSheet(listOf(urlText)))
+                                        // Direct preset download: reuse same action as preset buttons
+                                        val prefs = DownloadUtil.DownloadPreferences.createFromPreferences()
+                                        dialogViewModel?.postAction(
+                                            Action.DownloadWithPreset(urlList = listOf(urlText), preferences = prefs)
+                                        )
                                     }
-                                } else {
-                                    dialogViewModel?.postAction(Action.ShowSheet())
                                 }
                             },
                             modifier = Modifier
@@ -233,7 +226,7 @@ fun HomeTabScreen(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
-                            enabled = true
+                            enabled = urlText.isNotEmpty()
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.FileDownload,
@@ -272,35 +265,7 @@ fun HomeTabScreen(
         )
     }
 
-    // Dialog rendering (same as DownloadPageV2)
-    if (showDialog && dialogViewModel != null) {
-        DownloadDialog(
-            state = state,
-            sheetState = sheetState,
-            config = Config(),
-            preferences = com.junkfood.seal.util.DownloadUtil.DownloadPreferences.createFromPreferences(),
-            onPreferencesUpdate = { /* preferences update */ },
-            onActionPost = { dialogViewModel.postAction(it) },
-        )
-    }
-
-    // Selection state handling (same as DownloadPageV2)
-    when (selectionState) {
-        is com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState.FormatSelection ->
-            FormatPage(
-                state = selectionState,
-                onDismissRequest = { dialogViewModel?.postAction(Action.Reset) },
-            )
-
-        is com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.SelectionState.PlaylistSelection -> {
-            PlaylistSelectionPage(
-                state = selectionState,
-                onDismissRequest = { dialogViewModel?.postAction(Action.Reset) },
-            )
-        }
-
-        SelectionState.Idle -> {}
-    }
+    // Remove dialog and selection UI on Home to bypass configuration entirely
 }
 
 @Composable

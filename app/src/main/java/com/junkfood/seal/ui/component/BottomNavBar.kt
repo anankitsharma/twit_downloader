@@ -144,6 +144,7 @@ enum class NavTab { Home, Downloads, Settings }
 fun ModernBottomNav(
     selectedTab: NavTab,
     onSelect: (NavTab) -> Unit,
+    downloadsBadgeCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -179,7 +180,8 @@ fun ModernBottomNav(
                     label = "Downloads",
                     selected = selectedTab == NavTab.Downloads,
                     onClick = { onSelect(NavTab.Downloads) },
-                    prominent = true
+                    prominent = true,
+                    badgeCount = downloadsBadgeCount
                 )
             }
 
@@ -200,7 +202,8 @@ private fun ModernItem(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
-    prominent: Boolean = false
+    prominent: Boolean = false,
+    badgeCount: Int = 0
 ) {
     val pillHeight = 44.dp
     val pillShape = RoundedCornerShape(20.dp)
@@ -222,7 +225,25 @@ private fun ModernItem(
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = label, tint = tint)
+        Box(contentAlignment = Alignment.TopEnd) {
+            Icon(imageVector = icon, contentDescription = label, tint = tint)
+            if (badgeCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .offset(x = 8.dp, y = (-6).dp)
+                        .size(16.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.error),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = badgeCount.coerceAtMost(99).toString(),
+                        color = MaterialTheme.colorScheme.onError,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+            }
+        }
         AnimatedContent(targetState = selected, transitionSpec = {
             fadeIn(animationSpec = tween(200)) with fadeOut(animationSpec = tween(150))
         }, label = "pillLabel") { show ->
