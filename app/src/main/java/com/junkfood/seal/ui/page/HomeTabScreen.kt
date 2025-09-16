@@ -106,7 +106,7 @@ fun HomeTabScreen(
         }
     }
 
-    XHeaderScaffold(title = "Home") {
+    XHeaderScaffold(title = "X Video Downloader") {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -255,7 +255,7 @@ fun HomeTabScreen(
                     // helper/subtext + spacing
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Tip: paste a post link or press Download to analyze clipboard automatically.",
+                        text = "Tip: Just paste link -> click on download — it’s that simple.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp)

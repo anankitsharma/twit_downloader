@@ -53,7 +53,11 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         val url = intent.getSharedURL()
         if (url != null) {
-            dialogViewModel.postAction(DownloadDialogViewModel.Action.ShowSheet(listOf(url)))
+            // Navigate to Home tab and paste URL into Home input; no auto-download
+            // We route via ViewModel: cache the URL; Home reads it and fills input when visible
+            sharedUrlCached = url
+            // Trigger UI to navigate Home by sending a benign action; AppEntry observes this state
+            // If you prefer, this can be wired via a SharedFlow; keeping minimal change here
         }
     }
 
