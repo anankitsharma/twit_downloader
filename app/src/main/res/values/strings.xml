@@ -471,4 +471,7 @@
     <string name="privacy_policy_subtitle">Read privacy policy for using our app.</string>
     <string name="contact_us_subtitle">Your feedback matters! Reach out to us</string>
     <string name="tip_text">Tip: Just paste link -> click on download  it is that simple.</string>
+    <string name="privacy_policy_url">https://teknologya.com/privacy-policy-xdown/</string>
+    <string name="contact_email">ankit8053@gmail.com</string>
 </resources>
+

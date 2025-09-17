@@ -58,6 +58,10 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
 
     val darkThemePreference = LocalDarkTheme.current
     var showThemeDialog by remember { mutableStateOf(false) }
+    
+    // Get string resources outside of onClick lambdas
+    val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
+    val contactEmail = stringResource(R.string.contact_email)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -131,9 +135,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     title = stringResource(R.string.privacy_policy),
                     subtitle = stringResource(R.string.privacy_policy_subtitle),
                     onClick = {
-                    // Open privacy URL (replace with your actual link)
-                    val url = "https://example.com/privacy"
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    // Open privacy policy URL
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl)))
                     }
                 )
             }
@@ -148,7 +151,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:")
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("support@example.com"))
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf(contactEmail))
                         putExtra(Intent.EXTRA_SUBJECT, "Feedback - ${context.getString(R.string.app_name)}")
                     }
                     try { context.startActivity(intent) } catch (_: Exception) {}
