@@ -53,6 +53,7 @@ import com.rit.twitdownloader.ui.component.ModernBottomNav
 import com.rit.twitdownloader.ui.component.NavTab
 import com.rit.twitdownloader.ui.component.FloatingToast
 import com.rit.twitdownloader.ui.component.BottomBanner
+// import com.rit.twitdownloader.ui.component.NavigationDrawer // Assuming this was removed as per earlier steps
 import com.rit.twitdownloader.download.DownloaderV2
 import org.koin.compose.koinInject
 import com.rit.twitdownloader.ui.page.command.TaskListPage
@@ -78,15 +79,15 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val view = LocalView.current
-    val windowWidth = LocalWindowWidthState.current
+    // val windowWidth = LocalWindowWidthState.current // Assuming removed
     val sheetState by dialogViewModel.sheetStateFlow.collectAsStateWithLifecycle()
     val cookiesViewModel: CookiesViewModel = koinViewModel()
     val downloader: DownloaderV2 = koinInject()
 
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val versionReport = App.packageInfo.versionName.toString()
-    val appName = stringResource(R.string.app_name)
-    val scope = rememberCoroutineScope()
+    // val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed) // Assuming removed
+    // val versionReport = App.packageInfo.versionName.toString() // Assuming removed
+    // val appName = stringResource(R.string.app_name) // Assuming removed or used elsewhere
+    // val scope = rememberCoroutineScope() // Assuming removed
 
     // Keep status bar painted and consistent across tab transitions
     SideEffect {
@@ -132,6 +133,10 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     val seenStartedIds = remember { mutableSetOf<String>() }
     val seenEnqueuedIds = remember { mutableSetOf<String>() }
 
+    // Get string resources
+    val downloadCompletedText = stringResource(R.string.download_completed)
+    val downloadFailedText = stringResource(R.string.download_failed)
+
     // Observe task state map to detect starts/completions/errors
     LaunchedEffect(Unit) {
         // naive polling via snapshot - replace with a proper flow if exposed later
@@ -152,12 +157,12 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                 if (state.downloadState is com.rit.twitdownloader.download.Task.DownloadState.Completed && !seenCompletedIds.contains(id)) {
                     seenCompletedIds.add(id)
                     unseenCompleted += 1
-                    bannerText = "Download completed"
+                    bannerText = downloadCompletedText // Use the variable here
                     showBanner = true
                 }
                 if (state.downloadState is com.rit.twitdownloader.download.Task.DownloadState.Error && !seenCompletedIds.contains(id)) {
                     seenCompletedIds.add(id) // prevent repeat
-                    bannerText = "Download failed"
+                    bannerText = downloadFailedText // Use the variable here
                     showBanner = true
                 }
             }
@@ -207,97 +212,70 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
                     end = paddingValues.calculateEndPadding(layoutDirection)
                 )
         ) {
-            NavigationDrawer(
-                windowWidth = windowWidth,
-                drawerState = drawerState,
-                currentRoute = currentRoute,
-                currentTopDestination = currentTopDestination,
-                showQuickSettings = true,
-                gesturesEnabled = false,
-                onDismissRequest = { drawerState.close() },
-                onNavigateToRoute = {
-                    if (currentRoute != it) {
-                        navController.navigate(it) {
-                            launchSingleTop = true
-                            popUpTo(route = Route.HOME)
-                        }
-                    }
-                },
-                footer = {
-                    Text(
-                        appName + "\n" + versionReport + "\n" + currentRoute,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp),
-                    )
-                },
-            ) {
-                // Crossfade tab destinations to avoid flashes while keeping the top area stable
-                androidx.compose.animation.Crossfade(
-                    targetState = navController.currentBackStackEntryAsState().value?.destination?.route,
-                    animationSpec = androidx.compose.animation.core.tween(150)
-                ) { routeKey ->
+            // Assuming NavigationDrawer was removed and NavHost is a direct child
+            // Crossfade tab destinations to avoid flashes while keeping the top area stable
+            androidx.compose.animation.Crossfade(
+                targetState = navController.currentBackStackEntryAsState().value?.destination?.route,
+                animationSpec = androidx.compose.animation.core.tween(150)
+            ) { routeKey ->
                 key(routeKey) {
-                NavHost(
-                    modifier = Modifier.align(Alignment.Center),
-                    navController = navController,
-                    startDestination = Route.HOME_TAB,
-                ) {
-                    animatedComposable(Route.HOME) {
-                        DownloadPageV2(
-                            dialogViewModel = dialogViewModel,
-                            onMenuOpen = {
-                                view.slightHapticFeedback()
-                                scope.launch { drawerState.open() }
-                            },
-                        )
-                    }
-                    animatedComposable(Route.DOWNLOADS) { VideoListPage { onNavigateBack() } }
-                    animatedComposableVariant(Route.TASK_LIST) {
-                        TaskListPage(
-                            onNavigateBack = onNavigateBack,
-                            onNavigateToDetail = { navController.navigate(Route.TASK_LOG id it) },
-                        )
-                    }
-                    slideInVerticallyComposable(
-                        Route.TASK_LOG arg Route.TASK_HASHCODE,
-                        arguments = listOf(navArgument(Route.TASK_HASHCODE) { type = NavType.IntType }),
+                    NavHost(
+                        modifier = Modifier.align(Alignment.Center),
+                        navController = navController,
+                        startDestination = Route.HOME_TAB,
                     ) {
-                        TaskLogPage(
+                        animatedComposable(Route.HOME) {
+                            DownloadPageV2(
+                                dialogViewModel = dialogViewModel
+                                // onMenuOpen removed
+                            )
+                        }
+                        animatedComposable(Route.DOWNLOADS) { VideoListPage { onNavigateBack() } }
+                        animatedComposableVariant(Route.TASK_LIST) {
+                            TaskListPage(
+                                onNavigateBack = onNavigateBack,
+                                onNavigateToDetail = { navController.navigate(Route.TASK_LOG id it) },
+                            )
+                        }
+                        slideInVerticallyComposable(
+                            Route.TASK_LOG arg Route.TASK_HASHCODE,
+                            arguments = listOf(navArgument(Route.TASK_HASHCODE) { type = NavType.IntType }),
+                        ) {
+                            TaskLogPage(
+                                onNavigateBack = onNavigateBack,
+                                taskHashCode = it.arguments?.getInt(Route.TASK_HASHCODE) ?: -1,
+                            )
+                        }
+
+                        // Bottom tab routes
+                        animatedComposable(Route.HOME_TAB) {
+                            HomeTabScreen(
+                                dialogViewModel = dialogViewModel
+                                // onMenuOpen removed
+                            )
+                        }
+                        animatedComposable(Route.DOWNLOAD_TAB) {
+                            DownloadPageV2(
+                                dialogViewModel = dialogViewModel
+                                // onMenuOpen removed
+                            )
+                        }
+                        animatedComposable(Route.SETTINGS_TAB) {
+                            SettingsTabScreen(
+                                onNavigateTo = { route ->
+                                    navController.navigate(route = route) { launchSingleTop = true }
+                                }
+                            )
+                        }
+
+                        settingsGraph(
                             onNavigateBack = onNavigateBack,
-                            taskHashCode = it.arguments?.getInt(Route.TASK_HASHCODE) ?: -1,
+                            onNavigateTo = { route -> navController.navigate(route = route) { launchSingleTop = true } },
+                            cookiesViewModel = cookiesViewModel
                         )
-                    }
-
-                    // Bottom tab routes
-                    animatedComposable(Route.HOME_TAB) {
-                        HomeTabScreen(
-                            dialogViewModel = dialogViewModel
-                        )
-                    }
-                    animatedComposable(Route.DOWNLOAD_TAB) {
-                        DownloadPageV2(
-                            dialogViewModel = dialogViewModel
-                        )
-                    }
-                    animatedComposable(Route.SETTINGS_TAB) {
-                        SettingsTabScreen(
-                            onNavigateTo = { route ->
-                                navController.navigate(route = route) { launchSingleTop = true }
-                            }
-                        )
-                    }
-
-                    settingsGraph(
-                        onNavigateBack = onNavigateBack,
-                        onNavigateTo = { route -> navController.navigate(route = route) { launchSingleTop = true } },
-                        cookiesViewModel = cookiesViewModel
-                    )
-                } // <-- closes NavHost inside key
+                    } // <-- closes NavHost inside key
                 } // <-- closes key
-                }
-
-            } // <-- closes NavigationDrawer content lambda (MISSING brace was added here)
+            } // <-- closes Crossfade
 
             // Global overlays
             Box(modifier = Modifier.fillMaxSize()) {
@@ -330,4 +308,3 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
 // settingsGraph is defined in AppEntryExtras.kt
 
 // Previews moved to AppEntryPreviews.kt
-

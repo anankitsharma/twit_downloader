@@ -1,9 +1,22 @@
 <resources>
-    <string name="app_name" translatable="false">Twitter Video Downloader</string>
+    <string name="app_name" translatable="false">XDown</string>
     <string name="video_directory">Video folder</string>
     <string name="extract_audio">Save as audio</string>
     <string name="create_thumbnail">Save thumbnail</string>
     <string name="settings">Settings</string>
+    <string name="home">Home</string>
+    <string name="downloads">Downloads</string>
+    <string name="url_placeholder">https://...</string>
+    <string name="login_x">Login X</string>
+    <string name="login_subtitle">Login to improve experience</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="x_video_downloader">X Video Downloader</string>
+    <string name="enter_post_link">Enter Post Link</string>
+    <string name="paste_from_clipboard">Paste from clipboard</string>
+    <string name="download_completed">Download completed</string>
+    <string name="download_failed">Download failed</string>
     <string name="download_settings_desc">General, format, custom command for Twitter videos</string>
     <string name="download">Download</string>
     <string name="url_empty">The Twitter video link cannot be empty</string>

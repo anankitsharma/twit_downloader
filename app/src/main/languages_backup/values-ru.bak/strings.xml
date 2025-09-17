@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">XDown</string>
     <string name="download_settings_desc">Основные настройки, формат, своя команда</string>
     <string name="settings">Настройки</string>
     <string name="video_directory">Папка с видео</string>

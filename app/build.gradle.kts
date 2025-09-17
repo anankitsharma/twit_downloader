@@ -47,7 +47,7 @@ android {
         applicationId = "com.rit.twitdownloader"
         minSdk = 24
         targetSdk = 35
-        versionCode = 200_000_150
+        versionCode = currentVersionCode // Changed this line
         check(versionCode == currentVersionCode)
 
         versionName = baseVersionName
@@ -117,7 +117,7 @@ android {
             }
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            resValue("string", "app_name", "Twitter Video Downloader Debug")
+            resValue("string", "app_name", "XDown Debug")
         }
     }
 
@@ -132,7 +132,7 @@ android {
         create("githubPreview") {
             dimension = "publishChannel"
             applicationIdSuffix = ".preview"
-            resValue("string", "app_name", "Twitter Video Downloader Preview")
+            resValue("string", "app_name", "XDown Preview")
         }
 
         create("fdroid") {

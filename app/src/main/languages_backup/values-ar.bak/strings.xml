@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">XDown</string>
     <string name="extract_audio">حفظ كملف صوت</string>
     <string name="create_thumbnail">تنزيل الصورة المصغرة</string>
     <string name="download_settings_desc">عام، التنسيق، أمر مخصص</string>

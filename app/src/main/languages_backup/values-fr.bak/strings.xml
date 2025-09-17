@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">XDown</string>
     <string name="video_directory">Dossier vidéo</string>
     <string name="extract_audio">Enregistrer en tant qu\'audio</string>
     <string name="create_thumbnail">Enregistrer la miniature</string>

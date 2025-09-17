@@ -109,7 +109,7 @@ fun HomeTabScreen(
         }
     }
 
-    XHeaderScaffold(title = "X Video Downloader") {
+    XHeaderScaffold(title = stringResource(R.string.x_video_downloader)) {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -128,7 +128,7 @@ fun HomeTabScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     // Soft label above the field
                     Text(
-                        text = "Enter Post Link",
+                        text = stringResource(R.string.enter_post_link),
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -138,7 +138,7 @@ fun HomeTabScreen(
                     TextField(
                         value = urlText,
                         onValueChange = { urlText = it },
-                        placeholder = { Text("https://...") },
+                        placeholder = { Text(stringResource(R.string.url_placeholder)) },
                         singleLine = true,
                         textStyle = MaterialTheme.typography.bodyLarge,
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
@@ -155,7 +155,7 @@ fun HomeTabScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.Outlined.ContentPaste,
-                                    contentDescription = "Paste from clipboard",
+                                    contentDescription = stringResource(R.string.paste_from_clipboard),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -212,7 +212,7 @@ fun HomeTabScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Paste",
+                                text = stringResource(R.string.paste),
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
@@ -249,7 +249,7 @@ fun HomeTabScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Download",
+                                text = stringResource(R.string.download),
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                             )
                         }

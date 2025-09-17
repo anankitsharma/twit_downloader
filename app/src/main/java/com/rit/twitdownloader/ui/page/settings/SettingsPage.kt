@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues // Added import
+import androidx.compose.foundation.layout.ExperimentalLayoutApi // Added import
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -15,7 +19,7 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.outlined.Language
+// import androidx.compose.material.icons.outlined.Language // Commented out - not used in English-only build
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.SettingsApplications
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +50,7 @@ import com.rit.twitdownloader.util.DarkThemePreference.Companion.ON
 import com.rit.twitdownloader.util.PreferenceUtil
 
 @SuppressLint("BatteryLife")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) // Added ExperimentalLayoutApi
 @Composable
 fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
     val context = LocalContext.current
@@ -57,21 +61,26 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        )
     ) {
 
-            // Display Language (top-level)
-            item {
-                val langSubtitle = "English" // Default fallback
-                SettingRow(
-                    icon = Icons.Outlined.Language,
-                    iconTint = MaterialTheme.colorScheme.secondary,
-                    badgeColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
-                    title = stringResource(id = R.string.language),
-                    subtitle = langSubtitle,
-                    onClick = { onNavigateTo(Route.LANGUAGES) }
-                )
-            }
+            // Display Language (top-level) - Commented out for English-only build
+            // item {
+            //     val langSubtitle = "English" // Default fallback
+            //     SettingRow(
+            //         icon = Icons.Outlined.Language,
+            //         iconTint = MaterialTheme.colorScheme.secondary,
+            //         badgeColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+            //         title = stringResource(id = R.string.language),
+            //         subtitle = langSubtitle,
+            //         onClick = { onNavigateTo(Route.LANGUAGES) }
+            //     )
+            // }
             // Dark theme (top-level; replaces nested display/appearance page)
             item {
                 SettingRow(
@@ -89,8 +98,8 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     icon = Icons.Rounded.SettingsApplications,
                     iconTint = MaterialTheme.colorScheme.tertiary,
                     badgeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
-                    title = "Login X",
-                    subtitle = "Login to improve experience",
+                    title = stringResource(R.string.login_x),
+                    subtitle = stringResource(R.string.login_subtitle),
                     onClick = { onNavigateTo(Route.COOKIE_PROFILE) }
                 )
             }
@@ -100,7 +109,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     icon = Icons.Rounded.Star,
                     iconTint = MaterialTheme.colorScheme.secondary,
                     badgeColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
-                    title = "Rate Us",
+                    title = stringResource(R.string.rate_us),
                     subtitle = "Enjoying the app? Give us a 5 star.",
                     onClick = {
                     // Open Play Store listing
@@ -119,7 +128,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     icon = Icons.Rounded.Lock,
                     iconTint = MaterialTheme.colorScheme.primary,
                     badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    title = "Privacy Policy",
+                    title = stringResource(R.string.privacy_policy),
                     subtitle = "Read privacy policy for using our app.",
                     onClick = {
                     // Open privacy URL (replace with your actual link)
@@ -134,7 +143,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     icon = Icons.Rounded.Email,
                     iconTint = MaterialTheme.colorScheme.tertiary,
                     badgeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
-                    title = "Contact Us",
+                    title = stringResource(R.string.contact_us),
                     subtitle = "Your feedback matters! Reach out to us",
                     onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -149,10 +158,10 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
             // Version label at bottom
             item {
                 androidx.compose.material3.Text(
-                    text = "Version " + com.rit.twitdownloader.BuildConfig.VERSION_NAME,
+                    text = stringResource(R.string.version) + " " + com.rit.twitdownloader.BuildConfig.VERSION_NAME,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 24.dp),
                     textAlign = TextAlign.Center
                 )
             }

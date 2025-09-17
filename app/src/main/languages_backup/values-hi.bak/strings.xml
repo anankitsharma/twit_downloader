@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">XDown</string>
     <string name="video_directory">वीडियो फ़ोल्डर</string>
     <string name="extract_audio">ऑडियो के रूप में सहेजें</string>
     <string name="create_thumbnail">थंबनेल सहेजें</string>

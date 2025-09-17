@@ -1,10 +1,12 @@
-<b>Features</b>
-Download videos and audio files from video platforms supported by yt-dlp
-Embed metadata and video thumbnail into extracted audio files
-Download all videos in the playlist with one click
-Use embedded aria2c as external downloader for all your downloads
-Embed subtitles into downloaded videos
-Execute custom yt-dlp commands with templates
-Manage in-app downloads and custom command templates
-Easy to use and user-friendly
-Material Design 3 style UI, with dynamic color theme
+<b>XDown - Video Saver</b>
+The easiest way to download and save videos from X (Twitter) and other platforms.
+
+<b>Features:</b>
+• Download videos and audio from X/Twitter
+• Support for 1000+ video platforms via yt-dlp
+• High-quality downloads up to 4K
+• Audio extraction and conversion
+• Playlist download support
+• Material Design 3 interface
+
+Perfect for saving your favorite X videos for offline viewing!

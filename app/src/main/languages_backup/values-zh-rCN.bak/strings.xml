@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">XDown</string>
     <string name="video_url">视频链接</string>
     <string name="video_directory">视频目录</string>
     <string name="extract_audio">保存为音频</string>
