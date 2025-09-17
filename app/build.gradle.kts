@@ -47,7 +47,7 @@ android {
         applicationId = "com.rit.twitdownloader"
         minSdk = 24
         targetSdk = 35
-        versionCode = currentVersionCode // Changed this line
+        versionCode = currentVersionCode
         check(versionCode == currentVersionCode)
 
         versionName = baseVersionName
@@ -62,15 +62,35 @@ android {
                 abiFilters.addAll(abiFilterList)
             }
         }
+    }
 
-        if (splitApks) {
-            splits {
-                abi {
-                    isEnable = true
-                    reset()
-                    include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
-                    isUniversalApk = true
-                }
+    // ✅ FIX: Disable splits when building AAB, allow only for APK builds
+    if (splitApks && project.hasProperty("assembleApk")) {
+        // Enable splits for APK builds
+        splits {
+            abi {
+                isEnable = true
+                reset()
+                include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+                isUniversalApk = true
+            }
+        }
+    } else {
+        // Disable splits for AAB builds
+        splits {
+            abi {
+                isEnable = false
+            }
+        }
+        bundle {
+            abi {
+                enableSplit = false
+            }
+            density {
+                enableSplit = false
+            }
+            language {
+                enableSplit = false
             }
         }
     }
@@ -161,7 +181,7 @@ android {
             pickFirsts += "**/libjsc.so"
         }
     }
-    
+
     androidResources { generateLocaleConfig = true }
 
     namespace = "com.rit.twitdownloader"
