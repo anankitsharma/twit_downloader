@@ -258,7 +258,7 @@ fun HomeTabScreen(
                     // helper/subtext + spacing
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Tip: Just paste link -> click on download — it's that simple.",
+                        text = stringResource(R.string.tip_text),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp)

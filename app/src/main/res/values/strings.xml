@@ -467,4 +467,8 @@
         <item quantity="one">%d audio</item>
         <item quantity="other">%d audios</item>
     </plurals>
+    <string name="rate_us_subtitle">Enjoying the app? Give us a 5 star.</string>
+    <string name="privacy_policy_subtitle">Read privacy policy for using our app.</string>
+    <string name="contact_us_subtitle">Your feedback matters! Reach out to us</string>
+    <string name="tip_text">Tip: Just paste link -> click on download  it is that simple.</string>
 </resources>

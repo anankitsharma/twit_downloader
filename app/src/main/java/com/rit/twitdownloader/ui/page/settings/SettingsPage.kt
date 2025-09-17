@@ -110,7 +110,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     iconTint = MaterialTheme.colorScheme.secondary,
                     badgeColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
                     title = stringResource(R.string.rate_us),
-                    subtitle = "Enjoying the app? Give us a 5 star.",
+                    subtitle = stringResource(R.string.rate_us_subtitle),
                     onClick = {
                     // Open Play Store listing
                     val pkg = context.packageName
@@ -129,7 +129,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     iconTint = MaterialTheme.colorScheme.primary,
                     badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                     title = stringResource(R.string.privacy_policy),
-                    subtitle = "Read privacy policy for using our app.",
+                    subtitle = stringResource(R.string.privacy_policy_subtitle),
                     onClick = {
                     // Open privacy URL (replace with your actual link)
                     val url = "https://example.com/privacy"
@@ -144,7 +144,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     iconTint = MaterialTheme.colorScheme.tertiary,
                     badgeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
                     title = stringResource(R.string.contact_us),
-                    subtitle = "Your feedback matters! Reach out to us",
+                    subtitle = stringResource(R.string.contact_us_subtitle),
                     onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = Uri.parse("mailto:")
