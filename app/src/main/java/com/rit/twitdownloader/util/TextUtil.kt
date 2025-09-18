@@ -49,8 +49,15 @@ fun Number?.toFileSizeText(): String {
     if (this == null) return stringResource(id = R.string.unknown)
 
     return this.toFloat().run {
-        if (this > GIGA_BYTES) stringResource(R.string.filesize_gb).format(this / GIGA_BYTES)
-        else stringResource(R.string.filesize_mb).format(this / MEGA_BYTES)
+        // Use Locale.US to ensure consistent decimal formatting (1.0 instead of 1,0)
+        val formatter = java.text.DecimalFormat("#.##", java.text.DecimalFormatSymbols(java.util.Locale.US))
+        if (this > GIGA_BYTES) {
+            val size = formatter.format(this / GIGA_BYTES)
+            stringResource(R.string.filesize_gb).replace("%.2f", size)
+        } else {
+            val size = formatter.format(this / MEGA_BYTES)
+            stringResource(R.string.filesize_mb).replace("%.2f", size)
+        }
     }
 }
 
@@ -81,6 +88,9 @@ fun String?.toHttpsUrl(): String =
     this?.run { if (matches(Regex("^(http:).*"))) replaceFirst("http", "https") else this } ?: ""
 
 fun matchUrlFromClipboard(string: String, isMatchingMultiLink: Boolean = false): String {
+    // Handle empty/null input gracefully - don't show error for empty clipboard
+    if (string.isBlank()) return ""
+    
     findURLsFromString(string, !isMatchingMultiLink).joinToString(separator = "\n").run {
         if (isEmpty()) ToastUtil.makeToast(R.string.paste_fail_msg)
         else ToastUtil.makeToast(R.string.paste_msg)
@@ -89,6 +99,9 @@ fun matchUrlFromClipboard(string: String, isMatchingMultiLink: Boolean = false):
 }
 
 fun matchUrlFromSharedText(s: String): String {
+    // Handle empty/null input gracefully - don't show error for empty clipboard
+    if (s.isBlank()) return ""
+    
     findURLsFromString(s, true).joinToString(separator = "\n").run {
         if (isEmpty()) ToastUtil.makeToast(R.string.share_fail_msg)
         //            else makeToast(R.string.share_success_msg)
@@ -98,11 +111,12 @@ fun matchUrlFromSharedText(s: String): String {
 
 fun Number?.toBitrateText(): String {
     val br = this?.toFloat() ?: return ""
+    // Use Locale.US to ensure consistent decimal formatting
+    val formatter = java.text.DecimalFormat("#.##", java.text.DecimalFormatSymbols(java.util.Locale.US))
     return when {
         br <= 0f -> "" // i don't care
-        br < 1024f -> "%.1f Kbps".format(br)
-
-        else -> "%.2f Mbps".format(br / 1024f)
+        br < 1024f -> "${formatter.format(br)} Kbps"
+        else -> "${formatter.format(br / 1024f)} Mbps"
     }
 }
 

@@ -1,6 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.api.variant.FilterConfiguration
+import org.gradle.api.GradleException
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -17,9 +18,7 @@ plugins {
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")
 
 val splitApks = !project.hasProperty("noSplits")
-
 val abiFilterList = (properties["ABI_FILTERS"] as String).split(';')
-
 val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
 
 val baseVersionName = currentVersion.name
@@ -32,7 +31,7 @@ android {
         val keystoreProperties = Properties()
         keystoreProperties.load(FileInputStream(keystorePropertiesFile))
         signingConfigs {
-            create("githubPublish") {
+            create("playstore") {
                 keyAlias = keystoreProperties["keyAlias"].toString()
                 keyPassword = keystoreProperties["keyPassword"].toString()
                 storeFile = file(keystoreProperties["storeFile"]!!)
@@ -64,9 +63,8 @@ android {
         }
     }
 
-    // ✅ FIX: Disable splits when building AAB, allow only for APK builds
+    // ✅ Disable splits for AAB, only allow for APK builds
     if (splitApks && project.hasProperty("assembleApk")) {
-        // Enable splits for APK builds
         splits {
             abi {
                 isEnable = true
@@ -76,22 +74,13 @@ android {
             }
         }
     } else {
-        // Disable splits for AAB builds
         splits {
-            abi {
-                isEnable = false
-            }
+            abi { isEnable = false }
         }
         bundle {
-            abi {
-                enableSplit = false
-            }
-            density {
-                enableSplit = false
-            }
-            language {
-                enableSplit = false
-            }
+            abi { enableSplit = false }
+            density { enableSplit = false }
+            language { enableSplit = false }
         }
     }
 
@@ -127,17 +116,20 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("githubPublish")
+
+            if (!keystorePropertiesFile.exists()) {
+                throw GradleException(
+                    "keystore.properties not found. Please create it with Play Store signing details before building a release."
+                )
+            } else {
+                signingConfig = signingConfigs.getByName("playstore")
             }
         }
         debug {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("githubPublish")
-            }
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             resValue("string", "app_name", "XDown Debug")
+            // Debug builds use default debug keystore
         }
     }
 
@@ -147,12 +139,6 @@ android {
         create("generic") {
             dimension = "publishChannel"
             isDefault = true
-        }
-
-        create("githubPreview") {
-            dimension = "publishChannel"
-            applicationIdSuffix = ".preview"
-            resValue("string", "app_name", "XDown Preview")
         }
 
         create("fdroid") {
@@ -174,7 +160,6 @@ android {
 
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
-        // Ensure proper alignment for 16KB page size devices
         jniLibs {
             useLegacyPackaging = false
             pickFirsts += "**/libc++_shared.so"
@@ -223,4 +208,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.espresso.core)
     implementation(libs.androidx.compose.ui.tooling)
+
+    // Media3 ExoPlayer for internal video player
+    implementation("androidx.media3:media3-exoplayer:1.2.1")
+    implementation("androidx.media3:media3-ui:1.2.1")
+    implementation("androidx.media3:media3-common:1.2.1")
 }

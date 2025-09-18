@@ -28,8 +28,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT < 33) {
-            runBlocking { setLanguage(PreferenceUtil.getLocaleFromPreference()) }
+        // Set language for all API levels to ensure consistent locale handling
+        runBlocking { 
+            if (Build.VERSION.SDK_INT < 33) {
+                setLanguage(PreferenceUtil.getLocaleFromPreference())
+            } else {
+                // For API 33+, ensure we have a proper locale set
+                val savedLocale = PreferenceUtil.getLocaleFromPreference()
+                if (savedLocale != null) {
+                    setLanguage(savedLocale)
+                }
+            }
         }
         enableEdgeToEdge()
 
@@ -44,6 +53,15 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         AppEntry(dialogViewModel = dialogViewModel)
                     }
+                }
+            }
+        }
+
+        // Handle the initial intent as well (cold start via Share or View)
+        intent?.let { initialIntent ->
+            initialIntent.getSharedURL()?.let { url ->
+                if (!url.isNullOrEmpty()) {
+                    sharedUrlCached = url
                 }
             }
         }

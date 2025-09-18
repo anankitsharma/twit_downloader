@@ -57,7 +57,7 @@ import com.rit.twitdownloader.ui.page.downloadv2.ListItemStateText
 import com.rit.twitdownloader.ui.page.downloadv2.VideoListItem
 import org.koin.compose.koinInject
 import androidx.compose.runtime.saveable.rememberSaveable
-import com.rit.twitdownloader.util.matchUrlFromSharedText
+import com.rit.twitdownloader.util.findURLsFromString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,9 +90,13 @@ fun HomeTabScreen(
     LaunchedEffect(Unit) {
         if (!hasPastedFromClipboard && urlText.isEmpty()) {
             val clip = clipboardManager.getText()?.toString() ?: ""
-            val matched = matchUrlFromSharedText(clip)
-            if (!matched.isNullOrEmpty() && !UrlRules.isBlocked(matched)) {
-                urlText = matched
+            // Only try to match URLs if clipboard actually has content
+            if (clip.isNotEmpty()) {
+                // Silently extract first URL from clipboard without showing any toast
+                val matched = findURLsFromString(clip, true).joinToString(separator = "\n")
+                if (matched.isNotEmpty() && !UrlRules.isBlocked(matched)) {
+                    urlText = matched
+                }
             }
             hasPastedFromClipboard = true
         }

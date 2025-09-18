@@ -252,13 +252,7 @@ fun FormatItem(
         val codec =
             connectWithBlank(vcodecText, acodecText).run { if (isNotBlank()) "($this)" else this }
 
-        val tbrText =
-            when {
-                tbr == null -> "" // i don't care
-                tbr < 1024f -> "%.1f Kbps".format(tbr)
-
-                else -> "%.2f Mbps".format(tbr / 1024f)
-            }
+        val tbrText = tbr.toBitrateText()
 
         val fileSize = fileSize ?: fileSizeApprox ?: (tbr?.times(duration * 125))
         val fileSizeText = fileSize.toFileSizeText()

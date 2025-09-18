@@ -14,10 +14,12 @@ import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import com.rit.twitdownloader.App.Companion.context
 import com.rit.twitdownloader.R
+import com.rit.twitdownloader.ui.player.VideoPlayerActivity
 import java.io.File
 import okhttp3.internal.closeQuietly
 
 const val AUDIO_REGEX = "(mp3|aac|opus|m4a)$"
+const val VIDEO_REGEX = "(mp4|mkv|webm|avi|mov|flv|wmv|3gp)$"
 const val THUMBNAIL_REGEX = "\\.(jpg|png)$"
 const val SUBTITLE_REGEX = "\\.(lrc|vtt|srt|ass|json3|srv.|ttml)$"
 private const val PRIVATE_DIRECTORY_SUFFIX = ".Seal"
@@ -31,11 +33,15 @@ object FileUtil {
         }
     }
 
-    inline fun openFile(path: String, onFailureCallback: (Throwable) -> Unit) =
+    fun openFile(path: String, onFailureCallback: (Throwable) -> Unit) =
         path
             .runCatching {
-                createIntentForOpeningFile(this)?.run { context.startActivity(this) }
-                    ?: throw Exception()
+                if (isVideoFile(this)) {
+                    openVideoWithInternalPlayer(this)
+                } else {
+                    createIntentForOpeningFile(this)?.run { context.startActivity(this) }
+                        ?: throw Exception()
+                }
             }
             .onFailure { onFailureCallback(it) }
 
@@ -81,6 +87,50 @@ object FileUtil {
             setDataAndType(this.data, mimeType)
             clipData = ClipData(null, arrayOf(mimeType), ClipData.Item(data))
         }
+
+    private fun isVideoFile(path: String): Boolean {
+        return path.contains(Regex(VIDEO_REGEX))
+    }
+
+    private fun openVideoWithInternalPlayer(path: String) {
+        try {
+            val uri = createVideoUri(path)
+            val intent = Intent(context, VideoPlayerActivity::class.java).apply {
+                putExtra(VideoPlayerActivity.EXTRA_VIDEO_URI, uri.toString())
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("FileUtil", "Error opening video with internal player: $path", e)
+            // Fallback to external app
+            createIntentForOpeningFile(path)?.run { context.startActivity(this) }
+                ?: throw Exception("Unable to open video file")
+        }
+    }
+
+    private fun createVideoUri(path: String): Uri {
+        return try {
+            // Try content URI first
+            DocumentFile.fromSingleUri(context, Uri.parse(path))?.run {
+                if (exists()) return uri
+            }
+            
+            // Fallback to FileProvider for local files
+            val file = File(path)
+            if (file.exists()) {
+                FileProvider.getUriForFile(
+                    context,
+                    context.getFileProvider(),
+                    file
+                )
+            } else {
+                throw Exception("File not found: $path")
+            }
+        } catch (e: Exception) {
+            Log.e("FileUtil", "Error creating video URI for: $path", e)
+            throw e
+        }
+    }
 
     fun Context.getFileProvider() = "$packageName.provider"
 
