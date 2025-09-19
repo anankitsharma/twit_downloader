@@ -69,6 +69,9 @@ android {
         buildFeatures {
             buildConfig = true
         }
+
+        // Restrict to English only to reduce app size
+        resConfigs("en")
     }
 
     // ✅ Disable splits for AAB, only allow for APK builds
@@ -178,7 +181,9 @@ android {
         }
     }
 
-    androidResources { generateLocaleConfig = true }
+    androidResources { 
+        generateLocaleConfig = true
+    }
 
     namespace = "com.rit.twitdownloader"
 }

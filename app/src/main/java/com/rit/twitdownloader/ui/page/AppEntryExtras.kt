@@ -60,7 +60,8 @@ fun NavGraphBuilder.settingsGraph(
         animatedComposable(Route.CREDITS) { CreditsPage(onNavigateBack) }
         animatedComposable(Route.APPEARANCE) { AppearancePreferences(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo) }
         animatedComposable(Route.INTERACTION) { InteractionPreferencePage(onBack = onNavigateBack) }
-        animatedComposable(Route.LANGUAGES) { LanguagePage { onNavigateBack() } }
+        // Language selection removed - English only to reduce app size
+        // animatedComposable(Route.LANGUAGES) { LanguagePage { onNavigateBack() } }
         animatedComposable(Route.TEMPLATE) {
             TemplateListPage(onNavigateBack = onNavigateBack) { onNavigateTo(Route.TEMPLATE_EDIT id it) }
         }

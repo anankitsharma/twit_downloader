@@ -213,13 +213,14 @@ fun AppearancePreferences(onNavigateBack: () -> Unit, onNavigateTo: (String) -> 
                     },
                     onClick = { onNavigateTo(Route.DARK_THEME) },
                 )
-                PreferenceItem(
-                    title = stringResource(R.string.language),
-                    icon = Icons.Outlined.Language,
-                    description = Locale.getDefault().toDisplayName(),
-                ) {
-                    onNavigateTo(Route.LANGUAGES)
-                }
+                // Language selection removed - English only to reduce app size
+                // PreferenceItem(
+                //     title = stringResource(R.string.language),
+                //     icon = Icons.Outlined.Language,
+                //     description = Locale.getDefault().toDisplayName(),
+                // ) {
+                //     onNavigateTo(Route.LANGUAGES)
+                // }
             }
         },
     )

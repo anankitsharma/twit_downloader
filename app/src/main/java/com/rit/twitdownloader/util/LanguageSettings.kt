@@ -58,18 +58,8 @@ private const val MONGOLIAN = 47
 
 val LocaleLanguageCodeMap =
     mapOf(
-        // Essential languages only for MVP
+        // English only to reduce app size
         Locale("en", "US") to ENGLISH,
-        Locale("es") to SPANISH,
-        Locale("fr") to FRENCH,
-        Locale("de") to GERMAN,
-        Locale.forLanguageTag("zh-Hans") to SIMPLIFIED_CHINESE,
-        Locale("ja") to JAPANESE,
-        Locale("ko") to KOREAN,
-        Locale("pt") to PORTUGUESE,
-        Locale("ru") to RUSSIAN,
-        Locale("ar") to ARABIC,
-        Locale("hi") to HINDI,
     )
 
 @Composable
