@@ -57,7 +57,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
     // Minimal settings: remove battery/sponsor flows, keep simple items only
 
     val darkThemePreference = LocalDarkTheme.current
-    var showThemeDialog by remember { mutableStateOf(false) }
+    val isDark = darkThemePreference.isDarkTheme()
     
     // Get string resources outside of onClick lambdas
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
@@ -85,16 +85,36 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
             //         onClick = { onNavigateTo(Route.LANGUAGES) }
             //     )
             // }
-            // Dark theme (top-level; replaces nested display/appearance page)
+            // Dark theme toggle inline
             item {
-                SettingRow(
-                    icon = Icons.Rounded.Palette,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    badgeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    title = stringResource(id = R.string.dark_theme),
-                    subtitle = darkThemePreference.getDarkThemeDesc(),
-                    onClick = { showThemeDialog = true }
-                )
+                androidx.compose.material3.Surface(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+                ) {
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = Icons.Rounded.Palette,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(end = 12.dp)
+                        )
+                        androidx.compose.material3.Text(
+                            text = stringResource(id = R.string.dark_theme),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        androidx.compose.material3.Switch(
+                            checked = isDark,
+                            onCheckedChange = { checked ->
+                                PreferenceUtil.modifyDarkThemePreference(if (checked) ON else OFF)
+                            }
+                        )
+                    }
+                }
             }
             // Login X -> open existing cookies page for now
             item {
@@ -170,44 +190,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
             }
         }
 
-    if (showThemeDialog) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showThemeDialog = false },
-            title = { Text(text = stringResource(id = R.string.dark_theme)) },
-            text = {
-                LazyColumn {
-                    item {
-                        androidx.compose.material3.ListItem(
-                            headlineContent = { Text(stringResource(R.string.follow_system)) },
-                            modifier = Modifier.clickable {
-                                PreferenceUtil.modifyDarkThemePreference(FOLLOW_SYSTEM)
-                                showThemeDialog = false
-                            }
-                        )
-                    }
-                    item {
-                        androidx.compose.material3.ListItem(
-                            headlineContent = { Text(stringResource(R.string.on)) },
-                            modifier = Modifier.clickable {
-                                PreferenceUtil.modifyDarkThemePreference(ON)
-                                showThemeDialog = false
-                            }
-                        )
-                    }
-                    item {
-                        androidx.compose.material3.ListItem(
-                            headlineContent = { Text(stringResource(R.string.off)) },
-                            modifier = Modifier.clickable {
-                                PreferenceUtil.modifyDarkThemePreference(OFF)
-                                showThemeDialog = false
-                            }
-                        )
-                    }
-                }
-            },
-            confirmButton = {}
-        )
-    }
+    // Dialog removed; toggle is inline now
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -3,6 +3,8 @@
 import android.os.Build
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -58,7 +60,7 @@ fun SealTheme(
     }
 
     val colorScheme =
-        dynamicColorScheme(!darkTheme).run {
+        (if (darkTheme) darkColorScheme() else lightColorScheme()).run {
             if (isHighContrastModeEnabled && darkTheme)
                 copy(
                     surface = Color.Black,

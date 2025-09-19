@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rit.twitdownloader.R
-import com.rit.twitdownloader.ui.theme.FixedAccentColors
+// Removed FixedAccentColors - simplified theme system
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -208,10 +208,10 @@ fun SingleSelectChip(
     trailingIcon: @Composable (() -> Unit)? = null,
     colors: SelectableChipColors =
         FilterChipDefaults.filterChipColors(
-            selectedContainerColor = FixedAccentColors.secondaryFixed,
-            selectedLabelColor = FixedAccentColors.onSecondaryFixed,
-            selectedLeadingIconColor = FixedAccentColors.onSecondaryFixed,
-            selectedTrailingIconColor = FixedAccentColors.onSecondaryFixed,
+            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            selectedTrailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             iconColor = MaterialTheme.colorScheme.onSurface,
             labelColor = MaterialTheme.colorScheme.onSurface,

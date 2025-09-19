@@ -16,16 +16,12 @@ import com.rit.twitdownloader.ui.theme.DEFAULT_SEED_COLOR
 import com.rit.twitdownloader.ui.theme.FixedColorRoles
 import com.rit.twitdownloader.util.DarkThemePreference
 import com.rit.twitdownloader.util.PreferenceUtil
-import com.rit.twitdownloader.util.paletteStyles
 import com.kyant.monet.LocalTonalPalettes
 import com.kyant.monet.PaletteStyle
 import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
 
 val LocalDarkTheme = compositionLocalOf { DarkThemePreference() }
-val LocalSeedColor = compositionLocalOf { DEFAULT_SEED_COLOR }
 val LocalWindowWidthState = staticCompositionLocalOf { WindowWidthSizeClass.Compact }
-val LocalDynamicColorSwitch = compositionLocalOf { false }
-val LocalPaletteStyleIndex = compositionLocalOf { 0 }
 val LocalFixedColorRoles = staticCompositionLocalOf {
     FixedColorRoles.fromColorSchemes(
         lightColors = lightColorScheme(),
@@ -36,22 +32,12 @@ val LocalFixedColorRoles = staticCompositionLocalOf {
 @Composable
 fun SettingsProvider(windowWidthSizeClass: WindowWidthSizeClass, content: @Composable () -> Unit) {
     PreferenceUtil.AppSettingsStateFlow.collectAsState().value.run {
-        val tonalPalettes =
-            if (isDynamicColorEnabled && Build.VERSION.SDK_INT >= 31)
-                dynamicDarkColorScheme(LocalContext.current).toTonalPalettes()
-            else
-                Color(seedColor)
-                    .toTonalPalettes(
-                        paletteStyles.getOrElse(paletteStyleIndex) { PaletteStyle.TonalSpot }
-                    )
+        val tonalPalettes = Color(DEFAULT_SEED_COLOR).toTonalPalettes(PaletteStyle.TonalSpot)
 
         CompositionLocalProvider(
             LocalDarkTheme provides darkTheme,
-            LocalSeedColor provides seedColor,
-            LocalPaletteStyleIndex provides paletteStyleIndex,
             LocalTonalPalettes provides tonalPalettes,
             LocalWindowWidthState provides windowWidthSizeClass,
-            LocalDynamicColorSwitch provides isDynamicColorEnabled,
             content = content,
         )
     }

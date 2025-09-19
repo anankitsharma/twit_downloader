@@ -380,14 +380,15 @@ object PreferenceUtil {
         MutableStateFlow(
             AppSettings(
                 DarkThemePreference(
-                    darkThemeValue =
-                        kv.decodeInt(DARK_THEME_VALUE, DarkThemePreference.FOLLOW_SYSTEM),
-                    isHighContrastModeEnabled = kv.decodeBool(HIGH_CONTRAST, false),
+                    darkThemeValue = when (val v = kv.decodeInt(DARK_THEME_VALUE, DarkThemePreference.OFF)) {
+                        DarkThemePreference.ON -> DarkThemePreference.ON
+                        else -> DarkThemePreference.OFF
+                    },
+                    isHighContrastModeEnabled = false,
                 ),
-                isDynamicColorEnabled =
-                    kv.decodeBool(DYNAMIC_COLOR, DynamicColors.isDynamicColorAvailable()),
-                seedColor = kv.decodeInt(THEME_COLOR, DEFAULT_SEED_COLOR),
-                paletteStyleIndex = kv.decodeInt(PALETTE_STYLE, 0),
+                isDynamicColorEnabled = false,
+                seedColor = DEFAULT_SEED_COLOR,
+                paletteStyleIndex = 0,
             )
         )
     val AppSettingsStateFlow = mutableAppSettingsStateFlow.asStateFlow()
@@ -407,29 +408,15 @@ object PreferenceUtil {
                         )
                 )
             }
-            kv.encode(DARK_THEME_VALUE, darkThemeValue)
-            kv.encode(HIGH_CONTRAST, isHighContrastModeEnabled)
+            val coerced = if (darkThemeValue == DarkThemePreference.ON) DarkThemePreference.ON else DarkThemePreference.OFF
+            kv.encode(DARK_THEME_VALUE, coerced)
+            kv.encode(HIGH_CONTRAST, false)
         }
     }
 
-    fun modifyThemeSeedColor(colorArgb: Int, paletteStyleIndex: Int) {
-        applicationScope.launch(Dispatchers.IO) {
-            mutableAppSettingsStateFlow.update {
-                it.copy(seedColor = colorArgb, paletteStyleIndex = paletteStyleIndex)
-            }
-            kv.encode(THEME_COLOR, colorArgb)
-            kv.encode(PALETTE_STYLE, paletteStyleIndex)
-        }
-    }
+    fun modifyThemeSeedColor(colorArgb: Int, paletteStyleIndex: Int) {}
 
-    fun switchDynamicColor(
-        enabled: Boolean = !mutableAppSettingsStateFlow.value.isDynamicColorEnabled
-    ) {
-        applicationScope.launch(Dispatchers.IO) {
-            mutableAppSettingsStateFlow.update { it.copy(isDynamicColorEnabled = enabled) }
-            kv.encode(DYNAMIC_COLOR, enabled)
-        }
-    }
+    fun switchDynamicColor(enabled: Boolean = false) {}
 
     fun encodeTaskListBackup(map: Map<Task, Task.State>) =
         runCatching { json.encodeToString<Map<Task, Task.State>>(map) }

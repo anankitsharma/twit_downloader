@@ -19,7 +19,7 @@ import com.rit.twitdownloader.ui.page.settings.about.AboutPage
 import com.rit.twitdownloader.ui.page.settings.about.CreditsPage
 import com.rit.twitdownloader.ui.page.settings.about.SponsorsPage
 import com.rit.twitdownloader.ui.page.settings.appearance.AppearancePreferences
-import com.rit.twitdownloader.ui.page.settings.appearance.DarkThemePreferences
+ 
 import com.rit.twitdownloader.ui.page.settings.appearance.LanguagePage
 import com.rit.twitdownloader.ui.page.settings.command.TemplateEditPage
 import com.rit.twitdownloader.ui.page.settings.command.TemplateListPage
@@ -58,6 +58,7 @@ fun NavGraphBuilder.settingsGraph(
         }
         animatedComposable(Route.DONATE) { SponsorsPage(onNavigateBack) }
         animatedComposable(Route.CREDITS) { CreditsPage(onNavigateBack) }
+        // Appearance page simplified; keep entry for back-compat if linked elsewhere
         animatedComposable(Route.APPEARANCE) { AppearancePreferences(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo) }
         animatedComposable(Route.INTERACTION) { InteractionPreferencePage(onBack = onNavigateBack) }
         // Language selection removed - English only to reduce app size
@@ -71,7 +72,8 @@ fun NavGraphBuilder.settingsGraph(
         ) {
             TemplateEditPage(onNavigateBack, it.arguments?.getInt(Route.TEMPLATE_ID) ?: -1)
         }
-        animatedComposable(Route.DARK_THEME) { DarkThemePreferences { onNavigateBack() } }
+        // Dark theme page now handled in AppearancePreferences; route kept for back-compat
+        animatedComposable(Route.DARK_THEME) { AppearancePreferences(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo) }
         animatedComposable(Route.NETWORK_PREFERENCES) {
             NetworkPreferences(
                 navigateToCookieProfilePage = { onNavigateTo(Route.COOKIE_PROFILE) }
