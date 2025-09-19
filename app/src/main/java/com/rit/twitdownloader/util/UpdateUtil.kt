@@ -26,9 +26,7 @@ object UpdateUtil {
     private const val OWNER = "JunkFood02"
     private const val REPO = "Seal"
     private const val ARM64 = "arm64-v8a"
-    private const val ARM32 = "armeabi-v7a"
-    private const val X86 = "x86"
-    private const val X64 = "x86_64"
+    // Removed ARM32, X86, X64 - only ARM64 supported for size optimization
     private const val TAG = "UpdateUtil"
 
     private val client = OkHttpClient()

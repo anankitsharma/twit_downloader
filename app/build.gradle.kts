@@ -19,7 +19,7 @@ val keystorePropertiesFile: File = rootProject.file("keystore.properties")
 
 val splitApks = !project.hasProperty("noSplits")
 val abiFilterList = (properties["ABI_FILTERS"] as String).split(';')
-val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
+val abiCodes = mapOf("arm64-v8a" to 1) // Only ARM64 supported for size optimization
 
 val baseVersionName = currentVersion.name
 val currentVersionCode = currentVersion.code.toInt()
@@ -53,16 +53,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
-        // Support for 16KB page size devices
+        // Support for 16KB page size devices - Optimized for modern ARM devices only
         ndk {
             if (splitApks) {
-                abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
+                abiFilters.addAll(listOf("arm64-v8a")) // Only 64-bit ARM for maximum size reduction
             } else {
-                abiFilters.addAll(abiFilterList)
+                abiFilters.addAll(listOf("arm64-v8a")) // Only 64-bit ARM for maximum size reduction
             }
 
             // ✅ Minimal addition: ensure native debug symbols are generated
-            debugSymbolLevel = "FULL"
+            debugSymbolLevel = "SYMBOL_TABLE" // Reduced from FULL to save space
         }
 
         // Enable native debug symbols for all build types (AGP 8.12+)
@@ -74,13 +74,13 @@ android {
         resConfigs("en")
     }
 
-    // ✅ Disable splits for AAB, only allow for APK builds
+    // ✅ Disable splits for AAB, only allow for APK builds - Optimized for ARM64 only
     if (splitApks && project.hasProperty("assembleApk")) {
         splits {
             abi {
                 isEnable = true
                 reset()
-                include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+                include("arm64-v8a") // Only 64-bit ARM for maximum size reduction
                 isUniversalApk = true
             }
         }
