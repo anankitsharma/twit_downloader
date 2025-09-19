@@ -60,6 +60,8 @@ import com.rit.twitdownloader.ui.page.command.TaskListPage
 import com.rit.twitdownloader.ui.page.command.TaskLogPage
 import com.rit.twitdownloader.ui.page.downloadv2.DownloadPageV2
 import com.rit.twitdownloader.ui.page.downloadv2.configure.DownloadDialogViewModel
+import com.rit.twitdownloader.util.SharedUrlBus
+import kotlinx.coroutines.flow.collectLatest
 import com.rit.twitdownloader.ui.page.settings.network.CookiesViewModel
 import com.rit.twitdownloader.ui.page.videolist.VideoListPage
 import kotlinx.coroutines.launch
@@ -122,6 +124,15 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     LaunchedEffect(currentRoute) {
         if (currentRoute in TopDestinations) {
             currentTopDestination = currentRoute
+        }
+    }
+
+    // Navigate to Home tab whenever a shared URL arrives so the user sees the input
+    LaunchedEffect(Unit) {
+        SharedUrlBus.urls.collectLatest {
+            if (navController.currentDestination?.route != Route.HOME_TAB) {
+                navController.navigate(Route.HOME_TAB) { launchSingleTop = true }
+            }
         }
     }
 

@@ -80,7 +80,6 @@ const val ARIA2C = "aria2c"
 const val COOKIES = "cookies"
 const val USER_AGENT = "user_agent"
 const val USER_AGENT_STRING = "user_agent_string"
-const val AUTO_UPDATE = "auto_update"
 const val UPDATE_CHANNEL = "update_channel"
 const val PRIVATE_MODE = "private_mode"
 private const val DYNAMIC_COLOR = "dynamic_color"
@@ -306,13 +305,7 @@ object PreferenceUtil {
     fun isNetworkAvailableForDownload() =
         CELLULAR_DOWNLOAD.getBoolean() || !App.connectivityManager.isActiveNetworkMetered
 
-    fun isAutoUpdateEnabled(): Boolean {
-        return when {
-            isFDroidBuild() -> false
-            isDebugBuild() -> false
-            else -> AUTO_UPDATE.getBoolean()
-        }
-    }
+    // isAutoUpdateEnabled function removed - auto-update functionality removed for Play Store compliance
 
     @DeprecatedSinceApi(api = 33)
     fun getLocaleFromPreference(): Locale? {

@@ -18,7 +18,6 @@ import com.rit.twitdownloader.ui.page.settings.SettingsPage
 import com.rit.twitdownloader.ui.page.settings.about.AboutPage
 import com.rit.twitdownloader.ui.page.settings.about.CreditsPage
 import com.rit.twitdownloader.ui.page.settings.about.SponsorsPage
-import com.rit.twitdownloader.ui.page.settings.about.UpdatePage
 import com.rit.twitdownloader.ui.page.settings.appearance.AppearancePreferences
 import com.rit.twitdownloader.ui.page.settings.appearance.DarkThemePreferences
 import com.rit.twitdownloader.ui.page.settings.appearance.LanguagePage
@@ -54,13 +53,11 @@ fun NavGraphBuilder.settingsGraph(
             AboutPage(
                 onNavigateBack = onNavigateBack,
                 onNavigateToCreditsPage = { onNavigateTo(Route.CREDITS) },
-                onNavigateToUpdatePage = { onNavigateTo(Route.AUTO_UPDATE) },
                 onNavigateToDonatePage = { onNavigateTo(Route.DONATE) },
             )
         }
         animatedComposable(Route.DONATE) { SponsorsPage(onNavigateBack) }
         animatedComposable(Route.CREDITS) { CreditsPage(onNavigateBack) }
-        animatedComposable(Route.AUTO_UPDATE) { UpdatePage(onNavigateBack) }
         animatedComposable(Route.APPEARANCE) { AppearancePreferences(onNavigateBack = onNavigateBack, onNavigateTo = onNavigateTo) }
         animatedComposable(Route.INTERACTION) { InteractionPreferencePage(onBack = onNavigateBack) }
         animatedComposable(Route.LANGUAGES) { LanguagePage { onNavigateBack() } }

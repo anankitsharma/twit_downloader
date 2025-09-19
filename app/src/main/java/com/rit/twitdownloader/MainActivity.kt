@@ -16,6 +16,7 @@ import com.rit.twitdownloader.ui.page.downloadv2.configure.DownloadDialogViewMod
 import com.rit.twitdownloader.ui.theme.SealTheme
 import com.rit.twitdownloader.util.PreferenceUtil
 import com.rit.twitdownloader.util.matchUrlFromSharedText
+import com.rit.twitdownloader.util.SharedUrlBus
 import com.rit.twitdownloader.util.setLanguage
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity() {
             initialIntent.getSharedURL()?.let { url ->
                 if (!url.isNullOrEmpty()) {
                     sharedUrlCached = url
+                    SharedUrlBus.emit(url)
                 }
             }
         }
@@ -72,10 +74,8 @@ class MainActivity : AppCompatActivity() {
         val url = intent.getSharedURL()
         if (url != null) {
             // Navigate to Home tab and paste URL into Home input; no auto-download
-            // We route via ViewModel: cache the URL; Home reads it and fills input when visible
             sharedUrlCached = url
-            // Trigger UI to navigate Home by sending a benign action; AppEntry observes this state
-            // If you prefer, this can be wired via a SharedFlow; keeping minimal change here
+            SharedUrlBus.emit(url)
         }
     }
 

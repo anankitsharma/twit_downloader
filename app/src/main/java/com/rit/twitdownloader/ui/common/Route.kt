@@ -33,7 +33,6 @@ object Route {
     const val COOKIE_PROFILE = "cookie_profile"
     const val COOKIE_GENERATOR_WEBVIEW = "cookie_webview"
     const val SUBTITLE_PREFERENCES = "subtitle_preferences"
-    const val AUTO_UPDATE = "auto_update"
     const val DONATE = "donate"
     const val TROUBLESHOOTING = "troubleshooting"
 

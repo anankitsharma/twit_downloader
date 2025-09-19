@@ -94,7 +94,7 @@ class App : Application() {
                 DownloadUtil.getCookiesContentFromDatabase().getOrNull()?.let {
                     FileUtil.writeContentToFile(it, getCookiesFile())
                 }
-                UpdateUtil.deleteOutdatedApk()
+                // deleteOutdatedApk() removed - auto-update functionality removed for Play Store compliance
             } catch (th: Throwable) {
                 withContext(Dispatchers.Main) { startCrashReportActivity(th) }
             }

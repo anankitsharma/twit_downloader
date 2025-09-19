@@ -60,6 +60,14 @@ android {
             } else {
                 abiFilters.addAll(abiFilterList)
             }
+
+            // ✅ Minimal addition: ensure native debug symbols are generated
+            debugSymbolLevel = "FULL"
+        }
+
+        // Enable native debug symbols for all build types (AGP 8.12+)
+        buildFeatures {
+            buildConfig = true
         }
     }
 
@@ -117,6 +125,8 @@ android {
                 "proguard-rules.pro",
             )
 
+            // Native debug symbols are automatically generated in AGP 8.12+ (also enabled above)
+
             if (!keystorePropertiesFile.exists()) {
                 throw GradleException(
                     "keystore.properties not found. Please create it with Play Store signing details before building a release."
@@ -161,7 +171,8 @@ android {
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
         jniLibs {
-            useLegacyPackaging = false
+            // Force extraction of JNI libs to filesystem so YoutubeDL can access libpython.zip.so
+            useLegacyPackaging = true
             pickFirsts += "**/libc++_shared.so"
             pickFirsts += "**/libjsc.so"
         }
@@ -175,6 +186,34 @@ android {
 ktfmt { kotlinLangStyle() }
 
 kotlin { jvmToolchain(21) }
+
+// Custom task to create native debug symbols for precompiled libraries
+tasks.register<Zip>("createNativeDebugSymbols") {
+    group = "build"
+    description = "Creates native debug symbols zip for precompiled libraries"
+
+    val primary = file("$buildDir/intermediates/merged_native_libs/genericRelease/out/lib")
+    val fallback = file("$buildDir/intermediates/merged_native_libs/release/out/lib")
+
+    if (primary.exists()) {
+        from(primary)
+    } else if (fallback.exists()) {
+        from(fallback)
+    }
+
+    archiveFileName.set("native-debug-symbols.zip")
+    destinationDirectory.set(file("$buildDir/outputs/native-debug-symbols/genericRelease"))
+
+    doLast {
+        println("✅ Native debug symbols created at: ${destinationDirectory.get()}/${archiveFileName.get()}")
+        println("📁 Checked source paths: ${primary.path} and ${fallback.path}")
+    }
+}
+
+// ✅ Minimal fix: don’t hardcode bundleGenericRelease, attach to any bundle tasks if they exist
+tasks.matching { it.name.startsWith("bundle") }.configureEach {
+    finalizedBy("createNativeDebugSymbols")
+}
 
 dependencies {
     implementation(project(":color"))

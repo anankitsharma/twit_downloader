@@ -25,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
-import androidx.compose.material.icons.filled.SdCardAlert
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderDelete
 import androidx.compose.material.icons.outlined.FolderOpen
@@ -179,12 +178,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
 
     val storagePermission =
         rememberPermissionState(permission = Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    val showDirectoryAlert =
-        Build.VERSION.SDK_INT >= 30 &&
-            !Environment.isExternalStorageManager() &&
-            (!audioDirectoryText.isValidDirectory() ||
-                !videoDirectoryText.isValidDirectory() ||
-                !customCommandDirectory.isValidDirectory())
+    // Removed showDirectoryAlert - no longer using MANAGE_EXTERNAL_STORAGE permission
 
     val launcher =
         rememberLauncherForActivityResult(
@@ -255,25 +249,6 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     PreferenceInfo(text = stringResource(id = R.string.custom_command_enabled_hint))
                 }
 
-            if (showDirectoryAlert)
-                item {
-                    PreferencesHintCard(
-                        title = stringResource(R.string.permission_issue),
-                        description = stringResource(R.string.permission_issue_desc),
-                        icon = Icons.Filled.SdCardAlert,
-                    ) {
-                        if (
-                            Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()
-                        ) {
-                            Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                data = Uri.parse("package:" + context.packageName)
-                                if (resolveActivity(context.packageManager) != null)
-                                    context.startActivity(this)
-                            }
-                        }
-                    }
-                }
             item { PreferenceSubtitle(text = stringResource(R.string.general_settings)) }
             if (!isCustomCommandEnabled) {
                 item {
@@ -345,7 +320,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     title = stringResource(id = R.string.private_directory),
                     description = stringResource(R.string.private_directory_desc),
                     icon = Icons.Outlined.TabUnselected,
-                    enabled = !showDirectoryAlert && !sdcardDownload && !isCustomCommandEnabled,
+                    enabled = !sdcardDownload && !isCustomCommandEnabled,
                     isChecked = isPrivateDirectoryEnabled,
                     onClick = {
                         isPrivateDirectoryEnabled = !isPrivateDirectoryEnabled

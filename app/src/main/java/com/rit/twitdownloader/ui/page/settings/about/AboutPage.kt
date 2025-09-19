@@ -3,14 +3,11 @@
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.NewReleases
-import androidx.compose.material.icons.outlined.Update
-import androidx.compose.material.icons.outlined.UpdateDisabled
 import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,12 +33,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.UrlAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import com.rit.twitdownloader.App
 import com.rit.twitdownloader.App.Companion.packageInfo
@@ -49,8 +42,6 @@ import com.rit.twitdownloader.R
 import com.rit.twitdownloader.ui.component.BackButton
 import com.rit.twitdownloader.ui.component.ConfirmButton
 import com.rit.twitdownloader.ui.component.PreferenceItem
-import com.rit.twitdownloader.ui.component.PreferenceSwitchWithDivider
-import com.rit.twitdownloader.util.AUTO_UPDATE
 import com.rit.twitdownloader.util.PreferenceUtil
 import com.rit.twitdownloader.util.ToastUtil
 
@@ -69,7 +60,6 @@ private const val TAG = "AboutPage"
 fun AboutPage(
     onNavigateBack: () -> Unit,
     onNavigateToCreditsPage: () -> Unit,
-    onNavigateToUpdatePage: () -> Unit,
     onNavigateToDonatePage: () -> Unit,
 ) {
     val scrollBehavior =
@@ -83,7 +73,6 @@ fun AboutPage(
     //    val screenDensity = configuration.densityDpi / 160f
     //    val screenHeight = (configuration.screenHeightDp.toFloat() * screenDensity).roundToInt()
     //    val screenWidth = (configuration.screenWidthDp.toFloat() * screenDensity).roundToInt()
-    var isAutoUpdateEnabled by remember { mutableStateOf(PreferenceUtil.isAutoUpdateEnabled()) }
 
     val info = App.getVersionReport()
     val versionName = packageInfo.versionName
@@ -173,22 +162,6 @@ fun AboutPage(
                     }
                 }
                 item {
-                    PreferenceSwitchWithDivider(
-                        title = stringResource(R.string.auto_update),
-                        description = stringResource(R.string.check_for_updates_desc),
-                        icon =
-                            if (isAutoUpdateEnabled) Icons.Outlined.Update
-                            else Icons.Outlined.UpdateDisabled,
-                        isChecked = isAutoUpdateEnabled,
-                        isSwitchEnabled = !App.isFDroidBuild(),
-                        onClick = onNavigateToUpdatePage,
-                        onChecked = {
-                            isAutoUpdateEnabled = !isAutoUpdateEnabled
-                            PreferenceUtil.updateValue(AUTO_UPDATE, isAutoUpdateEnabled)
-                        },
-                    )
-                }
-                item {
                     PreferenceItem(
                         title = stringResource(R.string.version),
                         description = versionName,
@@ -209,60 +182,5 @@ fun AboutPage(
     )
 }
 
-@OptIn(ExperimentalTextApi::class)
-@Composable
-@Preview
-fun AutoUpdateUnavailableDialog(onDismissRequest: () -> Unit = {}) {
-    val uriHandler = LocalUriHandler.current
-    val hapticFeedback = LocalHapticFeedback.current
-    val hyperLinkText = stringResource(id = R.string.switch_to_github_builds)
-    val text = stringResource(id = R.string.auto_update_disabled_msg, "F-Droid", hyperLinkText)
-
-    val annotatedString = buildAnnotatedString {
-        append(text)
-        val startIndex = text.indexOf(hyperLinkText)
-        val endIndex = startIndex + hyperLinkText.length
-        addUrlAnnotation(
-            UrlAnnotation("https://github.com/JunkFood02/Seal/releases/latest"),
-            start = startIndex,
-            end = endIndex,
-        )
-        addStyle(
-            SpanStyle(
-                color = MaterialTheme.colorScheme.tertiary,
-                textDecoration = TextDecoration.Underline,
-            ),
-            start = startIndex,
-            end = endIndex,
-        )
-    }
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            ConfirmButton(stringResource(id = R.string.got_it)) { onDismissRequest() }
-        },
-        icon = { Icon(Icons.Outlined.UpdateDisabled, null) },
-        title = {
-            Text(
-                text = stringResource(id = R.string.feature_unavailable),
-                textAlign = TextAlign.Center,
-            )
-        },
-        text = {
-            ClickableText(
-                text = annotatedString,
-                onClick = { index ->
-                    annotatedString.getUrlAnnotations(index, index).firstOrNull()?.let {
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                        uriHandler.openUri(it.item.url)
-                    }
-                },
-                style =
-                    MaterialTheme.typography.bodyMedium.copy(
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-            )
-        },
-    )
-}
+// AutoUpdateUnavailableDialog removed - auto-update functionality removed for Play Store compliance
 

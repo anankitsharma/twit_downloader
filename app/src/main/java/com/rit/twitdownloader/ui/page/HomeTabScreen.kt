@@ -58,6 +58,10 @@ import com.rit.twitdownloader.ui.page.downloadv2.VideoListItem
 import org.koin.compose.koinInject
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.rit.twitdownloader.util.findURLsFromString
+import com.rit.twitdownloader.util.SharedUrlBus
+import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +76,7 @@ fun HomeTabScreen(
     val taskStateMap = downloader.getTaskStateMap()
     var inlineUrl by rememberSaveable { mutableStateOf("") }
     var hasPastedFromClipboard by rememberSaveable { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
 
     // Dialog state management (same as DownloadPageV2)
     val sheetValue by dialogViewModel?.sheetValueFlow?.collectAsStateWithLifecycle()
@@ -99,6 +104,16 @@ fun HomeTabScreen(
                 }
             }
             hasPastedFromClipboard = true
+        }
+    }
+
+    // Listen for shared URLs from the system share sheet and paste into input
+    LaunchedEffect(Unit) {
+        SharedUrlBus.urls.collectLatest { incomingUrl ->
+            if (incomingUrl.isNotEmpty() && !UrlRules.isBlocked(incomingUrl)) {
+                urlText = incomingUrl
+                focusRequester.requestFocus()
+            }
         }
     }
 
@@ -148,7 +163,8 @@ fun HomeTabScreen(
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
+                            .height(56.dp)
+                            .focusRequester(focusRequester),
                         trailingIcon = {
                             IconButton(onClick = {
                                 val clipboardText = clipboardManager.getText()?.toString() ?: ""
