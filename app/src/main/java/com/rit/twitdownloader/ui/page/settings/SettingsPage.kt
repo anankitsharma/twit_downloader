@@ -75,7 +75,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF2F2F2)), // Light gray background like in the image
+            .background(MaterialTheme.colorScheme.surface),
         contentPadding = PaddingValues(
             start = 0.dp,
             end = 0.dp,
@@ -102,7 +102,11 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 6.dp),
-                    colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color.White),
+                    colors = androidx.compose.material3.CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.run {
+                            if (LocalDarkTheme.current.isDarkTheme()) surfaceContainer else surfaceContainerLowest
+                        }
+                    ),
                     elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 4.dp),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
                 ) {
@@ -146,12 +150,12 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                                     fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                                     fontSize = 16.sp
                                 ),
-                                color = Color(0xFF333333)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             androidx.compose.material3.Text(
                                 text = "Toggle the app theme",
                                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                                color = Color(0xFF666666)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         
@@ -242,7 +246,7 @@ fun SettingsPage(onNavigateBack: () -> Unit, onNavigateTo: (String) -> Unit) {
                     androidx.compose.material3.Text(
                         text = "Version ${com.rit.twitdownloader.BuildConfig.VERSION_NAME} • Made with ",
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                        color = Color(0xFFAAAAAA)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     androidx.compose.material3.Icon(
                         imageVector = Icons.Rounded.Favorite,

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rit.twitdownloader.ui.common.LocalDarkTheme
 
 @Composable
 fun SettingRow(
@@ -38,7 +39,11 @@ fun SettingRow(
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 6.dp),
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.run {
+                if (LocalDarkTheme.current.isDarkTheme()) surfaceContainer else surfaceContainerLowest
+            }
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(16.dp) // More rounded corners like in the image
     ) {
@@ -77,7 +82,7 @@ fun SettingRow(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     ),
-                    color = Color(0xFF333333) // Dark gray for title
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 if (!subtitle.isNullOrBlank()) {
@@ -86,7 +91,7 @@ fun SettingRow(
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontSize = 14.sp
                         ),
-                        color = Color(0xFF666666), // Lighter gray for subtitle
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2
                     )
                 }
@@ -97,7 +102,7 @@ fun SettingRow(
                 Icon(
                     imageVector = Icons.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color(0xFF666666),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
             }

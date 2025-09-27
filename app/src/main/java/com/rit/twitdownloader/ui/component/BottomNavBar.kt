@@ -38,11 +38,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import com.rit.twitdownloader.ui.common.LocalDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -142,6 +148,16 @@ fun BottomNavBar(
 // New modern API as requested
 enum class NavTab { Home, Downloads, Settings }
 
+// Helper function to get outlined version of icons
+private fun getOutlinedIcon(icon: ImageVector): ImageVector {
+    return when (icon) {
+        Icons.Filled.Home -> Icons.Outlined.Home
+        Icons.Filled.Download -> Icons.Outlined.Download
+        Icons.Filled.Settings -> Icons.Outlined.Settings
+        else -> icon
+    }
+}
+
 @Composable
 fun ModernBottomNav(
     selectedTab: NavTab,
@@ -149,20 +165,23 @@ fun ModernBottomNav(
     downloadsBadgeCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        tonalElevation = 4.dp,
-        shadowElevation = 6.dp,
-        color = MaterialTheme.colorScheme.surface
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.run {
+                if (LocalDarkTheme.current.isDarkTheme()) Color.Black else Color.White
+            }
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 0.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             ModernItem(
                 icon = Icons.Filled.Home,
@@ -171,21 +190,13 @@ fun ModernBottomNav(
                 onClick = { onSelect(NavTab.Home) }
             )
 
-            // Center Downloads - slightly raised and prominent
-            val raise by animateDpAsState(
-                targetValue = if (selectedTab == NavTab.Downloads) 8.dp else 6.dp,
-                animationSpec = tween(200, easing = FastOutSlowInEasing), label = "raise"
+            ModernItem(
+                icon = Icons.Filled.Download,
+                label = "Downloads",
+                selected = selectedTab == NavTab.Downloads,
+                onClick = { onSelect(NavTab.Downloads) },
+                badgeCount = downloadsBadgeCount
             )
-            Box(modifier = Modifier.offset(y = -raise)) {
-                ModernItem(
-                    icon = Icons.Filled.Download,
-                    label = "Downloads",
-                    selected = selectedTab == NavTab.Downloads,
-                    onClick = { onSelect(NavTab.Downloads) },
-                    prominent = true,
-                    badgeCount = downloadsBadgeCount
-                )
-            }
 
             ModernItem(
                 icon = Icons.Filled.Settings,
@@ -207,32 +218,29 @@ private fun ModernItem(
     prominent: Boolean = false,
     badgeCount: Int = 0
 ) {
-    val pillHeight = 44.dp
-    val pillShape = RoundedCornerShape(20.dp)
-    val targetBg = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else Color.Transparent
-    val bg by animateColorAsState(targetValue = targetBg, animationSpec = tween(200), label = "bg")
-    val tint by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(200), label = "tint"
+    // Splash screen blue for selected state
+    val splashBlue = Color(0xFF1DA1F2) // Splash screen blue
+    val iconTint by animateColorAsState(
+        targetValue = if (selected) splashBlue else Color(0xFF9E9E9E), // Blue for selected, gray for unselected
+        animationSpec = tween(200), label = "iconTint"
     )
-    val scale by animateFloatAsState(targetValue = if (selected && prominent) 1.06f else 1f, animationSpec = tween(200), label = "scale")
+    val textTint by animateColorAsState(
+        targetValue = if (selected) splashBlue else Color(0xFF9E9E9E), // Blue for selected, gray for unselected
+        animationSpec = tween(200), label = "textTint"
+    )
 
-    Row(
+    Column(
         modifier = Modifier
-            .graphicsLayer { this.scaleX = scale; this.scaleY = scale }
-            .heightIn(min = 48.dp)
-            .clip(pillShape)
-            .background(bg)
             .clickable(role = Role.Tab) { onClick() }
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(contentAlignment = Alignment.TopEnd) {
             Icon(
-                imageVector = icon, 
+                imageVector = if (selected) icon else getOutlinedIcon(icon), 
                 contentDescription = label, 
-                tint = tint,
-                modifier = Modifier.size(20.dp)
+                tint = iconTint,
+                modifier = Modifier.size(24.dp)
             )
             if (badgeCount > 0) {
                 Box(
@@ -251,18 +259,13 @@ private fun ModernItem(
                 }
             }
         }
-        AnimatedContent(targetState = selected, transitionSpec = {
-            fadeIn(animationSpec = tween(200)) with fadeOut(animationSpec = tween(150))
-        }, label = "pillLabel") { show ->
-            if (show) {
-                Text(
-                    text = label,
-                    color = tint,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-        }
+        
+        Text(
+            text = label,
+            color = textTint,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal),
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }
 

@@ -85,6 +85,7 @@ import com.rit.twitdownloader.util.FileUtil
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import com.rit.twitdownloader.ui.common.LocalDarkTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -179,22 +180,26 @@ fun HomeTabScreen(
 
     XHeaderScaffold(title = stringResource(R.string.x_video_downloader)) {
         Column(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
             verticalArrangement = Arrangement.Top
         ) {
             // Floating card near top - full width for mobile
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.run {
+                        if (LocalDarkTheme.current.isDarkTheme()) surfaceContainer else surfaceContainerLowest
+                    }
                 ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
@@ -206,12 +211,12 @@ fun HomeTabScreen(
                         placeholder = { 
                             Text(
                                 text = "https://...",
-                                color = Color(0xFF657786) // Twitter light gray
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             ) 
                         },
                         singleLine = true,
                         textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            color = Color(0xFF1A1A1A)
+                            color = MaterialTheme.colorScheme.onSurface
                         ),
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                         modifier = Modifier
@@ -229,21 +234,21 @@ fun HomeTabScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.ContentPaste,
                                     contentDescription = stringResource(R.string.paste_from_clipboard),
-                                    tint = Color(0xFF1DA1F2), // Twitter blue
+                                    tint = Color(0xFF1DA1F2), // Splash screen blue
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                         },
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFF7F9FA), // Light gray background
-                            unfocusedContainerColor = Color(0xFFF7F9FA),
-                            disabledContainerColor = Color(0xFFF7F9FA),
-                            cursorColor = Color(0xFF1DA1F2), // Twitter blue cursor
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            cursorColor = Color(0xFF1DA1F2), // Keep splash screen blue cursor
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent,
-                            focusedPlaceholderColor = Color(0xFF657786),
-                            unfocusedPlaceholderColor = Color(0xFF657786)
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
 
@@ -252,7 +257,7 @@ fun HomeTabScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Paste Button - Twitter blue
+                        // Paste Button - Splash screen blue
                         Button(
                             onClick = {
                                 val clipboardText = clipboardManager.getText()?.toString() ?: ""
@@ -266,7 +271,7 @@ fun HomeTabScreen(
                                 .height(52.dp),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1DA1F2), // Twitter blue
+                                containerColor = Color(0xFF1DA1F2), // Splash screen blue
                                 contentColor = Color.White
                             )
                         ) {
@@ -284,7 +289,7 @@ fun HomeTabScreen(
                             )
                         }
 
-                        // Download Button - Twitter blue
+                        // Download Button - Splash screen blue
                         Button(
                             onClick = {
                                 if (urlText.isNotEmpty()) {
@@ -311,7 +316,7 @@ fun HomeTabScreen(
                                 .height(52.dp),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF1DA1F2), // Twitter blue
+                                containerColor = Color(0xFF1DA1F2), // Splash screen blue
                                 contentColor = Color.White
                             ),
                             enabled = urlText.isNotEmpty()
@@ -335,7 +340,7 @@ fun HomeTabScreen(
                     Text(
                         text = "Tip: Just paste the link → click download. It's that simple.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF657786), // Twitter light gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )

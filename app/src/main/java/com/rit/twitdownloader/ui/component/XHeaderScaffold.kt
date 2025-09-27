@@ -82,7 +82,7 @@ fun XHeaderScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .offset(y = (-24).dp),
-            color = Color.White,
+            color = MaterialTheme.colorScheme.surface,
             shadowElevation = 12.dp,
             tonalElevation = 12.dp,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
