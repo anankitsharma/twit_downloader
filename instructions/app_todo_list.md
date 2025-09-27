@@ -13,11 +13,12 @@
 - Update **settings screen** with a more premium design.  
 - Improve **media player design**.  
 - Adjust downloading placeholder UI:  
+- Add **splash screen**.  
   - Show smaller tiles in downloads screen.  
   - Keep larger tiles on homepage.  
   - Keep it in **tiles view** (no full view popup).  
 - Improve **input field style**.  
-- Add **splash screen**.  
+
 
 ## Phase 3 – New Features
 - Add support for **GIFs and images** download.  
@@ -37,3 +38,17 @@
 ## Phase 6 – Platform Readiness
 - Make app **production ready for Pinterest** downloads.  
 - Ensure **Twitter app** version is stable while preparing Pinterest support.  
+
+
+
+
+let's go deeper in the first task implementation only we will test it and I'll run it in android studio and tell you feedback ...
+
+-the issue of downloads not showing in downloads tab is still there after we reopen the app, as most of the apps keep the downloads whatever user has downloaded through our app in downloads section...
+
+- so dig deeper check different repos , read medium artichles check forums how it is implemented properly, what method is used etc etc, 
+
+- keep rechkign the code until you're sure now it will show the downloads after we repoen app in the downlaoded or downlads tab as history
+
+
+final resuslt all the downlaods which have been done by user should be there and show as other apps do

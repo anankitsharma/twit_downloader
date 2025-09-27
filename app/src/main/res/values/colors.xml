@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Twitter brand colors -->
+    <color name="twitter_blue">#1DA1F2</color>
+    <color name="twitter_dark">#14171A</color>
+    <color name="twitter_light">#657786</color>
+    <color name="twitter_extra_light">#AAB8C2</color>
+    
+    <!-- Basic colors -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    
+    <!-- Splash screen colors - blue and black shades -->
+    <color name="splash_background">#0F1419</color>
+    <color name="splash_gradient_start">#0F1419</color>
+    <color name="splash_gradient_mid">#1A2332</color>
+    <color name="splash_gradient_end">#2A3F5F</color>
+    
+    <!-- Progress bar colors -->
+    <color name="progress_blue">#1DA1F2</color>
+    <color name="progress_track">#33FFFFFF</color>
+</resources>

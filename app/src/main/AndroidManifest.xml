@@ -33,6 +33,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:theme="@style/Theme.TwitterVideoDownloader.Splash"
         tools:targetApi="tiramisu">
         <activity
             android:name=".CrashReportActivity"
@@ -48,17 +49,23 @@
             android:foregroundServiceType="dataSync" />
 
         <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation"
+            android:name=".SplashActivity"
             android:exported="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="unspecified"
-            android:theme="@style/Theme.TwitterVideoDownloader">
+            android:theme="@style/Theme.TwitterVideoDownloader.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="unspecified"
+            android:theme="@style/Theme.TwitterVideoDownloader">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 

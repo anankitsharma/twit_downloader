@@ -31,13 +31,18 @@ class VideoListViewModel : ViewModel() {
     private val viewState
         get() = stateFlow.value
 
-    private val _mediaInfoFlow = DatabaseUtil.getDownloadHistoryFlow()
+    private val _mediaInfoFlow = DatabaseUtil.getDownloadHistoryFlowWithInitial()
 
     val videoListFlow: Flow<List<DownloadedVideoInfo>> =
         _mediaInfoFlow.map { videoList ->
             android.util.Log.d(TAG, "VideoListViewModel: Received ${videoList.size} videos from database")
             videoList.forEach { video ->
                 android.util.Log.d(TAG, "Video: ${video.videoTitle} at ${video.videoPath}")
+                // Check if this video would be filtered out
+                val isAudio = video.videoPath.contains(Regex("(mp3|aac|opus|m4a)$"))
+                val isVideo = !isAudio
+                android.util.Log.d(TAG, "  - Type: ${if (isAudio) "AUDIO" else "VIDEO"}")
+                android.util.Log.d(TAG, "  - Would pass filter: ${video.filterByType()}")
             }
             videoList.reversed().sortedBy { info -> info.filterByType() }
         }
@@ -51,6 +56,19 @@ class VideoListViewModel : ViewModel() {
                 android.util.Log.d(TAG, "VideoListViewModel: Refreshed and found ${downloads.size} downloads")
             } catch (e: Exception) {
                 android.util.Log.e(TAG, "VideoListViewModel: Error refreshing video list", e)
+            }
+        }
+    }
+    
+    // Manual refresh to log current DB state (no DB reset)
+    fun forceRefresh() {
+        android.util.Log.d(TAG, "VideoListViewModel: Manual refresh - logging current DB state")
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val downloads = DatabaseUtil.getAllDownloadsWithLogging()
+                android.util.Log.d(TAG, "VideoListViewModel: Manual refresh found ${downloads.size} downloads")
+            } catch (e: Exception) {
+                android.util.Log.e(TAG, "VideoListViewModel: Error in manual refresh", e)
             }
         }
     }

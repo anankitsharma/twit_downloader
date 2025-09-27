@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Background square with rounded corners -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20,20 L180,20 A20,20 0,0,1 200,40 L200,160 A20,20 0,0,1 180,180 L20,180 A20,20 0,0,1 0,160 L0,40 A20,20 0,0,1 20,20 Z" />
+    
+    <!-- X letter (simplified) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70,70 L90,90 L100,80 L110,90 L130,70 L110,50 L100,60 L90,50 Z" />
+    
+    <!-- Download arrow (like the examples) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,100 L100,130 L90,120 L85,125 L100,140 L115,125 L110,120 Z" />
+    
+    <!-- Horizontal line below arrow (like examples) -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M80,145 L120,145 L120,155 L80,155 Z" />
+</vector>

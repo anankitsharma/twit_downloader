@@ -13,6 +13,7 @@ import com.rit.twitdownloader.database.objects.DownloadedVideoInfo
 import com.rit.twitdownloader.database.objects.OptionShortcut
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.emitAll
 import java.io.File
 
 object DatabaseUtil {
@@ -26,7 +27,8 @@ object DatabaseUtil {
             INSTANCE ?: buildDatabase().also { INSTANCE = it }
         }
     
-    private val dao = db.videoInfoDao()
+    private val dao
+        get() = db.videoInfoDao()
     
     private fun buildDatabase(): AppDatabase {
         android.util.Log.d("DatabaseUtil", "Building database with context: ${context.packageName}")
@@ -74,7 +76,7 @@ object DatabaseUtil {
         
         databaseFiles.forEach { file ->
             val fileName = file.name
-            // Check if this is an old database file from a different package
+            // Check if this is an old da   tabase file from a different package
             val isOldDatabase = when {
                 fileName.contains("com.junkfood.seal") -> true
                 fileName.contains("com.rit.twidown") -> true
@@ -134,6 +136,20 @@ object DatabaseUtil {
     }
 
     fun getDownloadHistoryFlow() = dao.getDownloadHistoryFlow()
+
+    // Emit current list immediately, then continue with live updates
+    fun getDownloadHistoryFlowWithInitial(): kotlinx.coroutines.flow.Flow<List<DownloadedVideoInfo>> =
+        kotlinx.coroutines.flow.flow {
+            try {
+                val initial = dao.getDownloadHistory()
+                android.util.Log.d(TAG, "Emitting initial downloads: ${initial.size}")
+                emit(initial)
+            } catch (e: Exception) {
+                android.util.Log.e(TAG, "Failed to emit initial downloads", e)
+                emit(emptyList())
+            }
+            emitAll(dao.getDownloadHistoryFlow())
+        }
 
     private suspend fun getDownloadHistory() = dao.getDownloadHistory()
     

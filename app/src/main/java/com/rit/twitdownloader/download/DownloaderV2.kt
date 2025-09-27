@@ -328,6 +328,8 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                                 scope.launch(Dispatchers.IO) {
                                     val count = DatabaseUtil.getDownloadCount()
                                     Log.d(TAG, "Database now contains $count downloads after saving: ${downloadedVideoInfo.videoTitle}")
+                                    
+                                    // No DB reset; Flow with initial emission will update UI
                                 }
                                 
                                 Log.d(TAG, "Successfully saved download to database: ${downloadedVideoInfo.videoTitle}")
@@ -466,6 +468,13 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                         downloadState = Completed(null)
 
                         val text = appContext.getString(R.string.status_completed)
+
+                        // For custom commands, we can't easily determine the file path
+                        // but we should still log that a custom command completed
+                        Log.d(TAG, "Custom command completed for URL: $url")
+                        
+                        // Note: Custom commands don't always produce video files that should be saved to download history
+                        // This is intentional as custom commands can be used for various purposes beyond video downloads
 
                         NotificationUtil.finishNotification(
                             notificationId = notificationId,

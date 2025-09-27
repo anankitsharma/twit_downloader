@@ -110,19 +110,33 @@ import org.koin.androidx.compose.koinViewModel
 
 fun DownloadedVideoInfo.filterByType(
     videoFilter: Boolean = false,
-    audioFilter: Boolean = true,
+    audioFilter: Boolean = false, // Show all files by default when no filter is active
 ): Boolean {
-    return if (!(videoFilter || audioFilter)) true
-    else if (audioFilter) this.videoPath.contains(Regex(AUDIO_REGEX))
-    else !this.videoPath.contains(Regex(AUDIO_REGEX))
+    val isAudio = this.videoPath.contains(Regex(AUDIO_REGEX))
+    val result = if (!(videoFilter || audioFilter)) {
+        true // Show all files when no filter is active
+    } else if (audioFilter) {
+        isAudio // Show only audio files when audio filter is active
+    } else if (videoFilter) {
+        !isAudio // Show only video files when video filter is active
+    } else {
+        true // Default to showing all files
+    }
+    
+    android.util.Log.d("VideoListPage", "FilterByType: ${this.videoTitle} - videoFilter=$videoFilter, audioFilter=$audioFilter, isAudio=$isAudio, result=$result")
+    return result
 }
 
 fun DownloadedVideoInfo.filterSort(
     viewState: VideoListViewModel.VideoListViewState,
     filterSet: Set<String>,
 ): Boolean {
-    return filterByType(videoFilter = viewState.videoFilter, audioFilter = viewState.audioFilter) &&
-        filterByExtractor(filterSet.elementAtOrNull(viewState.activeFilterIndex))
+    val typeFilterResult = filterByType(videoFilter = viewState.videoFilter, audioFilter = viewState.audioFilter)
+    val extractorFilterResult = filterByExtractor(filterSet.elementAtOrNull(viewState.activeFilterIndex))
+    val finalResult = typeFilterResult && extractorFilterResult
+    
+    android.util.Log.d("VideoListPage", "FilterSort: ${this.videoTitle} - typeFilter=$typeFilterResult, extractorFilter=$extractorFilterResult, finalResult=$finalResult")
+    return finalResult
 }
 
 fun DownloadedVideoInfo.filterByExtractor(extractor: String?): Boolean {
@@ -138,9 +152,50 @@ fun VideoListPage(viewModel: VideoListViewModel = koinViewModel(), onNavigateBac
     val fullVideoList by viewModel.videoListFlow.collectAsStateWithLifecycle(emptyList())
     val searchedVideoList by
         viewModel.searchedVideoListFlow.collectAsStateWithLifecycle(emptyList())
+    
+    // Force refresh when the page is first displayed
+    LaunchedEffect(Unit) {
+        android.util.Log.d("VideoListPage", "Page displayed - forcing refresh")
+        android.util.Log.d("VideoListPage", "Initial filter state: videoFilter=${viewState.videoFilter}, audioFilter=${viewState.audioFilter}")
+        
+        // Test filtering logic
+        val testVideo = DownloadedVideoInfo(
+            id = 999,
+            videoTitle = "Test Video",
+            videoAuthor = "Test Author", 
+            videoUrl = "https://test.com",
+            thumbnailUrl = "https://test.com/thumb.jpg",
+            videoPath = "/test/video.mp4",
+            extractor = "test"
+        )
+        val testAudio = DownloadedVideoInfo(
+            id = 998,
+            videoTitle = "Test Audio",
+            videoAuthor = "Test Author",
+            videoUrl = "https://test.com",
+            thumbnailUrl = "https://test.com/thumb.jpg", 
+            videoPath = "/test/audio.mp3",
+            extractor = "test"
+        )
+        
+        android.util.Log.d("VideoListPage", "Test filtering:")
+        android.util.Log.d("VideoListPage", "  Video file: ${testVideo.filterByType()} (should be true)")
+        android.util.Log.d("VideoListPage", "  Audio file: ${testAudio.filterByType()} (should be true)")
+        
+        viewModel.forceRefresh()
+    }
 
     val videoList = if (viewState.isSearching) searchedVideoList else fullVideoList
     val filterSet by viewModel.filterSetFlow.collectAsState(mutableSetOf())
+    
+    // Debug logging for UI display
+    LaunchedEffect(videoList.size) {
+        android.util.Log.d("VideoListPage", "Displaying ${videoList.size} videos in UI")
+        android.util.Log.d("VideoListPage", "Current filter state: videoFilter=${viewState.videoFilter}, audioFilter=${viewState.audioFilter}")
+        videoList.forEach { video ->
+            android.util.Log.d("VideoListPage", "  - Displaying: ${video.videoTitle} (${video.videoPath})")
+        }
+    }
 
     val scrollBehavior =
         if (fullVideoList.isNotEmpty())
