@@ -1,20 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Background gradient -->
-    <item>
-        <shape>
-            <gradient
-                android:startColor="#0F1419"
-                android:centerColor="#1A2332"
-                android:endColor="#2A3F5F"
-                android:angle="270" />
-        </shape>
-    </item>
-    
-    <!-- App logo in center -->
-    <item android:gravity="center">
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/ic_launcher_foreground" />
-    </item>
-</layer-list>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/splash_background" />
+</shape>

@@ -51,7 +51,9 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.TwitterVideoDownloader.Splash">
+            android:theme="@style/Theme.TwitterVideoDownloader.Splash"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
