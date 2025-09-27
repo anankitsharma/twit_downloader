@@ -24,6 +24,7 @@ import com.rit.twitdownloader.ui.page.settings.network.CookiesViewModel
 import com.rit.twitdownloader.ui.page.videolist.VideoListViewModel
 import com.rit.twitdownloader.util.AUDIO_DIRECTORY
 import com.rit.twitdownloader.util.COMMAND_DIRECTORY
+import com.rit.twitdownloader.util.DatabaseUtil
 import com.rit.twitdownloader.util.DownloadUtil
 import com.rit.twitdownloader.util.FileUtil
 import com.rit.twitdownloader.util.FileUtil.createEmptyFile
@@ -94,6 +95,22 @@ class App : Application() {
                 DownloadUtil.getCookiesContentFromDatabase().getOrNull()?.let {
                     FileUtil.writeContentToFile(it, getCookiesFile())
                 }
+                
+                // Clean up old database files from previous package names
+                DatabaseUtil.cleanupOldDatabases()
+                
+                // Test database functionality
+                val dbTestResult = DatabaseUtil.testDatabase()
+                android.util.Log.d("App", "Database test result: $dbTestResult")
+                
+                // Get initial download count
+                val initialCount = DatabaseUtil.getDownloadCount()
+                android.util.Log.d("App", "Initial download count: $initialCount")
+                
+                // Get all downloads with detailed logging
+                val allDownloads = DatabaseUtil.getAllDownloadsWithLogging()
+                android.util.Log.d("App", "Found ${allDownloads.size} downloads in database")
+                
                 // deleteOutdatedApk() removed - auto-update functionality removed for Play Store compliance
             } catch (th: Throwable) {
                 withContext(Dispatchers.Main) { startCrashReportActivity(th) }

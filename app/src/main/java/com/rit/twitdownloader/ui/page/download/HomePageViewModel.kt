@@ -13,6 +13,7 @@ import com.rit.twitdownloader.Downloader.manageDownloadError
 import com.rit.twitdownloader.Downloader.updatePlaylistResult
 import com.rit.twitdownloader.R
 import com.rit.twitdownloader.util.CUSTOM_COMMAND
+import com.rit.twitdownloader.util.DatabaseUtil
 import com.rit.twitdownloader.util.DownloadUtil
 import com.rit.twitdownloader.util.FORMAT_SELECTION
 import com.rit.twitdownloader.util.PLAYLIST
@@ -20,6 +21,8 @@ import com.rit.twitdownloader.util.PlaylistResult
 import com.rit.twitdownloader.util.PreferenceUtil.getBoolean
 import com.rit.twitdownloader.util.ToastUtil
 import com.rit.twitdownloader.util.VideoInfo
+import com.rit.twitdownloader.util.getUrlValidationErrorMessage
+import com.rit.twitdownloader.util.looksLikeUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,26 +52,47 @@ class HomePageViewModel : ViewModel() {
     fun startDownloadVideo() {
         val url = viewStateFlow.value.url
         Downloader.clearErrorState()
+        Downloader.clearErrorTracking()
+        
         if (CUSTOM_COMMAND.getBoolean()) {
             applicationScope.launch(Dispatchers.IO) { DownloadUtil.executeCommandInBackground(url) }
             return
         }
         if (!Downloader.isDownloaderAvailable()) return
+        
+        // Enhanced URL validation
         if (url.isBlank()) {
             ToastUtil.makeToast(context.getString(R.string.url_empty))
             return
         }
-        if (PLAYLIST.getBoolean()) {
-            viewModelScope.launch(Dispatchers.IO) { parsePlaylistInfo(url) }
+        
+        // Check if input looks like a URL before proceeding
+        if (!looksLikeUrl(url)) {
+            ToastUtil.makeToast(getUrlValidationErrorMessage(url))
             return
         }
+        
+        // Check if video is already downloaded
+        viewModelScope.launch(Dispatchers.IO) {
+            val existingInfo = DatabaseUtil.getInfoByUrl(url)
+            if (existingInfo != null) {
+                ToastUtil.makeToast("Already Downloaded")
+                return@launch
+            }
+            
+            // Continue with download if not already downloaded
+            if (PLAYLIST.getBoolean()) {
+                parsePlaylistInfo(url)
+                return@launch
+            }
 
-        if (FORMAT_SELECTION.getBoolean()) {
-            viewModelScope.launch(Dispatchers.IO) { fetchInfoForFormatSelection(url) }
-            return
+            if (FORMAT_SELECTION.getBoolean()) {
+                fetchInfoForFormatSelection(url)
+                return@launch
+            }
+
+            Downloader.getInfoAndDownload(url)
         }
-
-        Downloader.getInfoAndDownload(url)
     }
 
     private fun fetchInfoForFormatSelection(url: String) {
@@ -85,6 +109,7 @@ class HomePageViewModel : ViewModel() {
         Downloader.run {
             if (!isDownloaderAvailable()) return
             clearErrorState()
+            clearErrorTracking()
             updateState(State.FetchingInfo)
             DownloadUtil.getPlaylistOrVideoInfo(url)
                 .onSuccess { info ->

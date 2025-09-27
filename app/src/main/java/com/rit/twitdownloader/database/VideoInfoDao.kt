@@ -36,12 +36,21 @@ interface VideoInfoDao {
     @Query("select * from DownloadedVideoInfo where videoPath = :path")
     suspend fun getInfoByPath(path: String): DownloadedVideoInfo?
 
+    @Query("select * from DownloadedVideoInfo where videoUrl = :url")
+    suspend fun getInfoByUrl(url: String): DownloadedVideoInfo?
+
     @Transaction
     suspend fun insertInfoDistinctByPath(
         videoInfo: DownloadedVideoInfo,
         path: String = videoInfo.videoPath,
     ) {
-        if (getInfoByPath(path) == null) insert(videoInfo)
+        val existing = getInfoByPath(path)
+        if (existing == null) {
+            android.util.Log.d("VideoInfoDao", "Inserting new download: ${videoInfo.videoTitle}")
+            insert(videoInfo)
+        } else {
+            android.util.Log.d("VideoInfoDao", "Download already exists, skipping: ${videoInfo.videoTitle}")
+        }
     }
 
     @Delete suspend fun deleteInfo(vararg info: DownloadedVideoInfo)

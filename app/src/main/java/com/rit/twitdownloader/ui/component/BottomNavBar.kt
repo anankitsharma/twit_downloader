@@ -93,7 +93,8 @@ fun BottomNavBar(
                     onClick = { onSelect(BottomTab.Home) }
                 )
 
-                Spacer(modifier = Modifier.size(56.dp))
+                // Spacer to accommodate the center button (56dp + some padding)
+                Spacer(modifier = Modifier.size(64.dp))
 
                 BarItem(
                     icon = Icons.Filled.Settings,
@@ -114,8 +115,8 @@ fun BottomNavBar(
             shape = CircleShape,
             elevation = androidx.compose.material3.CardDefaults.elevatedCardElevation(centerElevation),
             modifier = Modifier
-                .offset(y = (-18).dp)
-                .size(64.dp)
+                .offset(y = (-16).dp)
+                .size(56.dp)
                 .clip(CircleShape)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
@@ -126,11 +127,12 @@ fun BottomNavBar(
                 containerColor = if (centerSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
             )
         ) {
-            Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(56.dp), contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Download,
                     contentDescription = "Downloads",
-                    tint = if (centerSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = if (centerSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -226,7 +228,12 @@ private fun ModernItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(contentAlignment = Alignment.TopEnd) {
-            Icon(imageVector = icon, contentDescription = label, tint = tint)
+            Icon(
+                imageVector = icon, 
+                contentDescription = label, 
+                tint = tint,
+                modifier = Modifier.size(20.dp)
+            )
             if (badgeCount > 0) {
                 Box(
                     modifier = Modifier
@@ -295,7 +302,12 @@ private fun RowScope.BarItem(
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = label, tint = contentColor)
+        Icon(
+            imageVector = icon, 
+            contentDescription = label, 
+            tint = contentColor,
+            modifier = Modifier.size(20.dp)
+        )
         AnimatedVisibility(
             visible = selected,
             enter = fadeIn() + slideInVertically { it / 2 } + scaleIn(initialScale = 0.9f),

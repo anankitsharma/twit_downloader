@@ -419,7 +419,7 @@ fun ListItemStateText(
                 is Running -> {
                     val progress = downloadState.progress
                     if (progress >= 0) {
-                        "%.1f %%".format(downloadState.progress * 100)
+                        "${(progress * 100).toInt()}%"
                     } else {
                         stringResource(R.string.status_downloading)
                     }
@@ -490,13 +490,19 @@ private fun CardItemStateText(modifier: Modifier = Modifier, downloadState: Task
 
     val text =
         when (downloadState) {
-            is Canceled -> R.string.status_canceled
-            is Completed -> R.string.status_downloaded
-            is Error -> R.string.status_error
-            is FetchingInfo -> R.string.status_fetching_video_info
-            Idle -> R.string.status_enqueued
-            ReadyWithInfo -> R.string.status_enqueued
-            is Running -> R.string.status_downloading
+            is Canceled -> stringResource(R.string.status_canceled)
+            is Completed -> stringResource(R.string.status_downloaded)
+            is Error -> stringResource(R.string.status_error)
+            is FetchingInfo -> stringResource(R.string.status_fetching_video_info)
+            Idle -> stringResource(R.string.status_enqueued)
+            ReadyWithInfo -> stringResource(R.string.status_enqueued)
+            is Running -> {
+                if (downloadState.progress >= 0) {
+                    "${(downloadState.progress * 100).toInt()}%"
+                } else {
+                    stringResource(R.string.status_downloading)
+                }
+            }
         }
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         if (downloadState is Error) {
@@ -509,7 +515,7 @@ private fun CardItemStateText(modifier: Modifier = Modifier, downloadState: Task
             Spacer(Modifier.width(4.dp))
         }
         Text(
-            text = stringResource(id = text),
+            text = text,
             modifier = Modifier,
             style = textStyle,
             color = contentColor,

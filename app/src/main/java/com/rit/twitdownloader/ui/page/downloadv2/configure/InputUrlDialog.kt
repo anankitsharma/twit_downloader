@@ -76,6 +76,9 @@ import com.rit.twitdownloader.ui.component.SealDialog
 import com.rit.twitdownloader.ui.page.downloadv2.configure.DownloadDialogViewModel.Action
 import com.rit.twitdownloader.ui.theme.ErrorTonalPalettes
 import com.rit.twitdownloader.util.findURLsFromString
+import com.rit.twitdownloader.util.getUrlValidationErrorMessage
+import com.rit.twitdownloader.util.looksLikeUrl
+import com.rit.twitdownloader.util.ToastUtil
 
 @Composable
 fun InputUrlPage(
@@ -257,6 +260,11 @@ private fun InputUrlPageImpl(
                 icon = Icons.AutoMirrored.Outlined.ArrowForward,
                 text = stringResource(R.string.proceed),
             ) {
+                // Enhanced URL validation
+                if (!looksLikeUrl(url)) {
+                    ToastUtil.makeToast(getUrlValidationErrorMessage(url))
+                    return@FilledButtonWithIcon
+                }
                 onActionPost(Action.ProceedWithURLs(listOf(url)))
             }
         }
@@ -477,7 +485,13 @@ private fun SavedUrlDialogImpl(
                 text = stringResource(R.string.proceed),
                 enabled = selectedUrl != null,
             ) {
-                onActionPost(Action.ProceedWithURLs(listOf(selectedUrl!!)))
+                val url = selectedUrl!!
+                // Enhanced URL validation
+                if (!looksLikeUrl(url)) {
+                    ToastUtil.makeToast(getUrlValidationErrorMessage(url))
+                    return@FilledButtonWithIcon
+                }
+                onActionPost(Action.ProceedWithURLs(listOf(url)))
             }
         },
         text = {

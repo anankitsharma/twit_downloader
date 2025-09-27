@@ -154,6 +154,11 @@ object Downloader {
     private val mutableErrorState: MutableStateFlow<ErrorState> = MutableStateFlow(ErrorState.None)
     private val mutableProcessCount = MutableStateFlow(0)
     private val mutableQuickDownloadCount = MutableStateFlow(0)
+    
+    // Track last shown error to prevent repeated toast messages
+    private var lastShownError: String? = null
+    private var lastErrorTimestamp: Long = 0
+    private val ERROR_COOLDOWN_MS = 3000L // 3 seconds cooldown between same error messages
 
     val mutableTaskList = mutableStateMapOf<String, CustomCommandTask>()
 
@@ -269,6 +274,11 @@ object Downloader {
 
     fun clearErrorState() {
         mutableErrorState.update { ErrorState.None }
+    }
+    
+    fun clearErrorTracking() {
+        lastShownError = null
+        lastErrorTimestamp = 0
     }
 
     private fun fetchInfoError(url: String, errorReport: String) {
@@ -524,9 +534,22 @@ object Downloader {
     ) {
         if (th is YoutubeDL.CanceledException) return
         th.printStackTrace()
+        
         val resId =
             if (isFetchingInfo) R.string.fetch_info_error_msg else R.string.download_error_msg
-        ToastUtil.makeToastSuspend(context.getString(resId))
+        val errorMessage = context.getString(resId)
+        
+        // Check if this is a repeated error within the cooldown period
+        val currentTime = System.currentTimeMillis()
+        val isRepeatedError = lastShownError == errorMessage && 
+                             (currentTime - lastErrorTimestamp) < ERROR_COOLDOWN_MS
+        
+        // Only show toast if it's not a repeated error
+        if (!isRepeatedError) {
+            ToastUtil.makeToastSuspend(errorMessage)
+            lastShownError = errorMessage
+            lastErrorTimestamp = currentTime
+        }
 
         val notificationTitle = title ?: url
 

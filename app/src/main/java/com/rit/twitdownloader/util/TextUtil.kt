@@ -79,6 +79,13 @@ fun String.isNumberInRange(start: Int, end: Int): Boolean {
 private const val URL_REGEX_PATTERN =
     "(http|https)://[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?"
 
+// Enhanced URL validation patterns
+private const val VALID_URL_PATTERN = 
+    "^(https?://)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([/\\w \\.-]*)*/?$"
+
+private const val SIMPLE_URL_PATTERN = 
+    "^(https?://)?[\\w\\-]+(\\.[\\w\\-]+)+([\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?$"
+
 fun String.isNumberInRange(range: IntRange): Boolean = this.isNumberInRange(range.first, range.last)
 
 fun ClosedFloatingPointRange<Float>.toIntRange() =
@@ -129,6 +136,52 @@ fun getErrorReport(th: Throwable, url: String): String =
 )
 fun matchUrlFromString(s: String, isMatchingMultiLink: Boolean = false): String =
     findURLsFromString(s, !isMatchingMultiLink).joinToString(separator = "\n")
+
+/**
+ * Validates if a string is a proper URL format
+ * @param input The string to validate
+ * @return true if the string is a valid URL format, false otherwise
+ */
+fun isValidUrlFormat(input: String): Boolean {
+    if (input.isBlank()) return false
+    
+    // Check if it matches basic URL pattern
+    val pattern = Pattern.compile(SIMPLE_URL_PATTERN, Pattern.CASE_INSENSITIVE)
+    return pattern.matcher(input.trim()).matches()
+}
+
+/**
+ * Validates if a string looks like a URL (more lenient than isValidUrlFormat)
+ * @param input The string to validate
+ * @return true if the string looks like a URL, false otherwise
+ */
+fun looksLikeUrl(input: String): Boolean {
+    if (input.isBlank()) return false
+    
+    val trimmed = input.trim()
+    
+    // Check for common URL indicators
+    return trimmed.contains(".") && 
+           (trimmed.startsWith("http://") || 
+            trimmed.startsWith("https://") || 
+            trimmed.contains("://") ||
+            trimmed.matches(Regex(".*\\.[a-zA-Z]{2,}.*")))
+}
+
+/**
+ * Gets a user-friendly error message for invalid URL input
+ * @param input The invalid input
+ * @return A descriptive error message
+ */
+fun getUrlValidationErrorMessage(input: String): String {
+    return when {
+        input.isBlank() -> "Please enter a URL"
+        input.length < 5 -> "URL is too short"
+        !input.contains(".") -> "Please enter a valid URL (must contain a domain)"
+        !looksLikeUrl(input) -> "Please enter a valid URL format (e.g., https://example.com)"
+        else -> "Please enter a valid URL"
+    }
+}
 
 fun findURLsFromString(input: String, firstMatchOnly: Boolean = false): List<String> {
     val result = mutableListOf<String>()

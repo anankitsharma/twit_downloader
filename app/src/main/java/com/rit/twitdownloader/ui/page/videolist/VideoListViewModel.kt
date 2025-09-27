@@ -34,7 +34,26 @@ class VideoListViewModel : ViewModel() {
     private val _mediaInfoFlow = DatabaseUtil.getDownloadHistoryFlow()
 
     val videoListFlow: Flow<List<DownloadedVideoInfo>> =
-        _mediaInfoFlow.map { it.reversed().sortedBy { info -> info.filterByType() } }
+        _mediaInfoFlow.map { videoList ->
+            android.util.Log.d(TAG, "VideoListViewModel: Received ${videoList.size} videos from database")
+            videoList.forEach { video ->
+                android.util.Log.d(TAG, "Video: ${video.videoTitle} at ${video.videoPath}")
+            }
+            videoList.reversed().sortedBy { info -> info.filterByType() }
+        }
+    
+    // Force refresh the video list
+    fun refreshVideoList() {
+        android.util.Log.d(TAG, "VideoListViewModel: Forcing refresh of video list")
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val downloads = DatabaseUtil.getAllDownloadsWithLogging()
+                android.util.Log.d(TAG, "VideoListViewModel: Refreshed and found ${downloads.size} downloads")
+            } catch (e: Exception) {
+                android.util.Log.e(TAG, "VideoListViewModel: Error refreshing video list", e)
+            }
+        }
+    }
 
     val searchedVideoListFlow =
         videoListFlow.combine(stateFlow) { list, state ->

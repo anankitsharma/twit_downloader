@@ -150,6 +150,14 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
 
     // Observe task state map to detect starts/completions/errors
     LaunchedEffect(Unit) {
+        // Clear seen IDs and banner state at app start to prevent showing old error states
+        seenCompletedIds.clear()
+        seenStartedIds.clear()
+        seenEnqueuedIds.clear()
+        showBanner = false
+        showStartedToast = false
+        unseenCompleted = 0
+        
         // naive polling via snapshot - replace with a proper flow if exposed later
         while (true) {
             val states = downloader.getTaskStateMap().toMap()

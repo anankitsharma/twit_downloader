@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.rit.twitdownloader.database.objects.CommandTemplate
 import com.rit.twitdownloader.download.DownloaderV2
 import com.rit.twitdownloader.download.Task
+import com.rit.twitdownloader.util.DatabaseUtil
 import com.rit.twitdownloader.util.DownloadUtil
 import com.rit.twitdownloader.util.PlaylistResult
+import com.rit.twitdownloader.util.ToastUtil
 import com.rit.twitdownloader.util.VideoInfo
 import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.Dispatchers
@@ -179,8 +181,36 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
         urlList: List<String>,
         preferences: DownloadUtil.DownloadPreferences,
     ) {
-        urlList.forEach { downloader.enqueue(Task(url = it, preferences = preferences)) }
-        hideDialog()
+        viewModelScope.launch(Dispatchers.IO) {
+            val alreadyDownloadedUrls = mutableListOf<String>()
+            val newUrls = mutableListOf<String>()
+            
+            // Check each URL to see if it's already downloaded
+            urlList.forEach { url ->
+                val existingInfo = DatabaseUtil.getInfoByUrl(url)
+                if (existingInfo != null) {
+                    alreadyDownloadedUrls.add(url)
+                } else {
+                    newUrls.add(url)
+                }
+            }
+            
+            // Show toast for already downloaded videos
+            if (alreadyDownloadedUrls.isNotEmpty()) {
+                withContext(Dispatchers.Main) {
+                    ToastUtil.makeToast("Already Downloaded: ${alreadyDownloadedUrls.size} video(s)")
+                }
+            }
+            
+            // Only download new videos
+            if (newUrls.isNotEmpty()) {
+                newUrls.forEach { downloader.enqueue(Task(url = it, preferences = preferences)) }
+            }
+            
+            withContext(Dispatchers.Main) {
+                hideDialog()
+            }
+        }
     }
 
     private fun runCommand(

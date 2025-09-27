@@ -19,11 +19,14 @@ import com.rit.twitdownloader.download.Task.DownloadState.Running
 import com.rit.twitdownloader.download.Task.RestartableAction.Download
 import com.rit.twitdownloader.download.Task.RestartableAction.FetchInfo
 import com.rit.twitdownloader.download.Task.TypeInfo
+import com.rit.twitdownloader.database.objects.DownloadedVideoInfo
+import com.rit.twitdownloader.util.DatabaseUtil
 import com.rit.twitdownloader.util.DownloadUtil
 import com.rit.twitdownloader.util.FileUtil
 import com.rit.twitdownloader.util.NotificationUtil
 import com.rit.twitdownloader.util.PreferenceUtil
 import com.rit.twitdownloader.util.VideoInfo
+import com.rit.twitdownloader.util.toHttpsUrl
 import com.yausername.youtubedl_android.YoutubeDL
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -125,6 +128,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
         val taskList =
             PreferenceUtil.decodeTaskListBackup()
                 .filter { it.value.downloadState !is Completed }
+                .filter { it.value.downloadState !is Error } // Don't restore error states
                 .mapValues { (_, state) ->
                     val preState = state.downloadState
                     val downloadState =
@@ -311,6 +315,29 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                     .onSuccess { pathList ->
                         downloadState = Completed(pathList.firstOrNull())
 
+                        // Save completed download to database for persistence
+                        if (pathList.isNotEmpty()) {
+                            info?.let { currentInfo ->
+                                val downloadedVideoInfo = currentInfo.toDownloadedVideoInfo(videoPath = pathList.first())
+                                Log.d(TAG, "Attempting to save download to database: ${downloadedVideoInfo.videoTitle}")
+                                Log.d(TAG, "Download details - URL: ${downloadedVideoInfo.videoUrl}, Path: ${downloadedVideoInfo.videoPath}")
+                                
+                                DatabaseUtil.insertInfo(downloadedVideoInfo)
+                                
+                                // Verify the save was successful
+                                scope.launch(Dispatchers.IO) {
+                                    val count = DatabaseUtil.getDownloadCount()
+                                    Log.d(TAG, "Database now contains $count downloads after saving: ${downloadedVideoInfo.videoTitle}")
+                                }
+                                
+                                Log.d(TAG, "Successfully saved download to database: ${downloadedVideoInfo.videoTitle}")
+                            } ?: run {
+                                Log.w(TAG, "Download completed but not saved to database - info is null")
+                            }
+                        } else {
+                            Log.w(TAG, "Download completed but not saved to database - pathList is empty")
+                        }
+
                         val text =
                             appContext.getString(
                                 if (pathList.isEmpty()) R.string.status_completed
@@ -451,4 +478,21 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
             .also { downloadState = Running(job = it, taskId = id) }
     }
 }
+
+// Extension function to convert VideoInfo to DownloadedVideoInfo
+private fun VideoInfo.toDownloadedVideoInfo(
+    id: Int = 0,
+    videoPath: String,
+): DownloadedVideoInfo =
+    this.run {
+        DownloadedVideoInfo(
+            id = id,
+            videoTitle = title,
+            videoAuthor = uploader ?: channel ?: uploaderId.toString(),
+            videoUrl = webpageUrl ?: originalUrl.toString(),
+            thumbnailUrl = thumbnail.toHttpsUrl(),
+            videoPath = videoPath,
+            extractor = extractorKey,
+        )
+    }
 
