@@ -21,16 +21,10 @@ fun SettingsTabScreen(
     onNavigateTo: (String) -> Unit = {}
 ) {
     XHeaderScaffold(title = stringResource(R.string.settings)) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            SettingsPage(
-                onNavigateBack = {},
-                onNavigateTo = onNavigateTo
-            )
-        }
+        SettingsPage(
+            onNavigateBack = {},
+            onNavigateTo = onNavigateTo
+        )
     }
 }
 

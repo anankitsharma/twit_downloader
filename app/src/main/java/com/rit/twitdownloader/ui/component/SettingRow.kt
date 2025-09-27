@@ -3,6 +3,8 @@
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -23,30 +25,31 @@ import androidx.compose.ui.unit.sp
 fun SettingRow(
     modifier: Modifier = Modifier,
     icon: ImageVector,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
-    badgeColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+    iconTint: Color = Color.White,
+    badgeColor: Color = Color(0xFFE0E0E0), // Light gray background for icon
     title: String,
     subtitle: String? = null,
+    showChevron: Boolean = true,
     onClick: () -> Unit = {},
 ) {
-    // Outer spacing so stacked cards have breathing room
+    // Modern card with minimal margins for wider appearance
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp), // << outer spacing
+            .padding(horizontal = 8.dp, vertical = 6.dp),
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp), // slightly higher for float effect
-        shape = RoundedCornerShape(12.dp) // softer corners
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(16.dp) // More rounded corners like in the image
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp), // << more internal padding
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Icon badge — slightly larger for visual balance
+            // Icon in circular background - matching the image design
             Surface(
                 modifier = Modifier
                     .size(48.dp)
@@ -61,11 +64,12 @@ fun SettingRow(
                         imageVector = icon,
                         contentDescription = null,
                         tint = iconTint,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
+            // Title and subtitle column
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -73,22 +77,30 @@ fun SettingRow(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     ),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color(0xFF333333) // Dark gray for title
                 )
 
                 if (!subtitle.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 14.sp
+                        ),
+                        color = Color(0xFF666666), // Lighter gray for subtitle
                         maxLines = 2
                     )
                 }
             }
 
-            // optional affordance (chevron) — uncomment if desired:
-            // Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Chevron arrow for navigation items
+            if (showChevron) {
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color(0xFF666666),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
