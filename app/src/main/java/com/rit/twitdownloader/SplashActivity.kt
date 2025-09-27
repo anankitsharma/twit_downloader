@@ -50,16 +50,17 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
     var alpha by remember { mutableStateOf(0f) }
     var progress by remember { mutableStateOf(0f) }
     
-    // Gradient background colors like the example
-    val gradientStart = Color(0xFF2D1B1B) // Dark brown-black
-    val gradientEnd = Color(0xFF3D2B2B) // Lighter brown
+    // X/Twitter gradient background colors
+    val gradientStart = Color(0xFF000000) // Pure black
+    val gradientMid = Color(0xFF1A1A1A) // Dark gray
+    val gradientEnd = Color(0xFF1DA1F2) // Twitter blue
     
     val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(gradientStart, gradientEnd)
+        colors = listOf(gradientStart, gradientMid, gradientEnd)
     )
     
     val progressColor = Color(0xFF1DA1F2) // Twitter blue
-    val progressTrackColor = Color(0xFF4A3A3A) // Dark brown
+    val progressTrackColor = Color(0xFF2A2A2A) // Dark gray
     
     // Logo and progress animation
     LaunchedEffect(Unit) {
@@ -158,54 +159,54 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
 @Composable
 fun VideoDecorativeElements() {
-    // Popcorn bucket - top left (like the example)
+    // X/Twitter logo - top left
     Text(
-        text = "🍿",
+        text = "𝕏",
         fontSize = 48.sp,
         modifier = Modifier
             .offset(x = 40.dp, y = 80.dp)
             .alpha(0.15f)
     )
     
-    // Play button - top right (like the example)
+    // Tweet/Message icon - top right
     Text(
-        text = "▶️",
+        text = "💬",
         fontSize = 44.sp,
         modifier = Modifier
             .offset(x = 280.dp, y = 100.dp)
             .alpha(0.12f)
     )
     
-    // Film strip - bottom right (like the example)
+    // Video play icon - bottom right
     Text(
-        text = "🎬",
+        text = "📺",
         fontSize = 40.sp,
         modifier = Modifier
             .offset(x = 300.dp, y = 500.dp)
             .alpha(0.1f)
     )
     
-    // Video camera - bottom left
+    // Download icon - bottom left
     Text(
-        text = "📹",
+        text = "⬇️",
         fontSize = 36.sp,
         modifier = Modifier
             .offset(x = 30.dp, y = 450.dp)
             .alpha(0.08f)
     )
     
-    // Download arrow - center left
+    // Share icon - center left
     Text(
-        text = "⬇️",
+        text = "🔗",
         fontSize = 32.sp,
         modifier = Modifier
             .offset(x = 20.dp, y = 300.dp)
             .alpha(0.06f)
     )
     
-    // Link icon - center right
+    // Like/Heart icon - center right
     Text(
-        text = "🔗",
+        text = "❤️",
         fontSize = 28.sp,
         modifier = Modifier
             .offset(x = 320.dp, y = 350.dp)
