@@ -50,10 +50,16 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
     var alpha by remember { mutableStateOf(0f) }
     var progress by remember { mutableStateOf(0f) }
     
-    // Simple dark background
-    val backgroundColor = Color(0xFF0F1419)
+    // Gradient background colors like the example
+    val gradientStart = Color(0xFF2D1B1B) // Dark brown-black
+    val gradientEnd = Color(0xFF3D2B2B) // Lighter brown
+    
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(gradientStart, gradientEnd)
+    )
+    
     val progressColor = Color(0xFF1DA1F2) // Twitter blue
-    val progressTrackColor = Color(0xFF2A3F5F) // Dark blue
+    val progressTrackColor = Color(0xFF4A3A3A) // Dark brown
     
     // Logo and progress animation
     LaunchedEffect(Unit) {
@@ -75,30 +81,72 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor),
-        contentAlignment = Alignment.Center
+            .background(backgroundGradient)
     ) {
+        // Decorative background elements like the example
+        VideoDecorativeElements()
+        
+        // Main content
         Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Bigger logo with animation
-            Image(
-                painter = painterResource(id = R.mipmap.ic_launcher_foreground),
-                contentDescription = "App Logo",
+            // App icon with black background like the example
+            Box(
                 modifier = Modifier
-                    .size(160.dp) // Bigger logo
+                    .size(120.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Black)
+                    .padding(20.dp)
                     .alpha(alpha)
-                    .scale(scale)
+                    .scale(scale),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                    contentDescription = "App Logo",
+                    modifier = Modifier.size(80.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // App name
+            Text(
+                text = "X Video Downloader",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.alpha(alpha)
             )
             
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             
-            // Modern progress bar
+            // Subtitle
+            Text(
+                text = "One-click Fast Download",
+                fontSize = 14.sp,
+                color = Color(0xFFB0BEC5),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.alpha(alpha)
+            )
+        }
+        
+        // Progress bar at bottom like the example
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 80.dp)
+                .padding(horizontal = 32.dp)
+        ) {
             LinearProgressIndicator(
                 progress = progress,
                 modifier = Modifier
-                    .width(200.dp)
+                    .fillMaxWidth()
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp)),
                 color = progressColor,
@@ -106,5 +154,62 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             )
         }
     }
+}
+
+@Composable
+fun VideoDecorativeElements() {
+    // Popcorn bucket - top left (like the example)
+    Text(
+        text = "🍿",
+        fontSize = 48.sp,
+        modifier = Modifier
+            .offset(x = 40.dp, y = 80.dp)
+            .alpha(0.15f)
+    )
+    
+    // Play button - top right (like the example)
+    Text(
+        text = "▶️",
+        fontSize = 44.sp,
+        modifier = Modifier
+            .offset(x = 280.dp, y = 100.dp)
+            .alpha(0.12f)
+    )
+    
+    // Film strip - bottom right (like the example)
+    Text(
+        text = "🎬",
+        fontSize = 40.sp,
+        modifier = Modifier
+            .offset(x = 300.dp, y = 500.dp)
+            .alpha(0.1f)
+    )
+    
+    // Video camera - bottom left
+    Text(
+        text = "📹",
+        fontSize = 36.sp,
+        modifier = Modifier
+            .offset(x = 30.dp, y = 450.dp)
+            .alpha(0.08f)
+    )
+    
+    // Download arrow - center left
+    Text(
+        text = "⬇️",
+        fontSize = 32.sp,
+        modifier = Modifier
+            .offset(x = 20.dp, y = 300.dp)
+            .alpha(0.06f)
+    )
+    
+    // Link icon - center right
+    Text(
+        text = "🔗",
+        fontSize = 28.sp,
+        modifier = Modifier
+            .offset(x = 320.dp, y = 350.dp)
+            .alpha(0.07f)
+    )
 }
 
