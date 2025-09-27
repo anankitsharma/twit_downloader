@@ -179,37 +179,41 @@ fun HomeTabScreen(
 
     XHeaderScaffold(title = stringResource(R.string.x_video_downloader)) {
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp) // increased spacing for modern look
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top
         ) {
-            // Modern URL Input Card (design-only changes)
+            // Floating card near top - full width for mobile
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.White
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Soft label above the field
-                    Text(
-                        text = stringResource(R.string.enter_post_link),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
 
-                    // Rounded filled text field
+                    // URL Input Field with Twitter/X styling
                     TextField(
                         value = urlText,
                         onValueChange = { urlText = it },
-                        placeholder = { Text(stringResource(R.string.url_placeholder)) },
+                        placeholder = { 
+                            Text(
+                                text = "https://...",
+                                color = Color(0xFF657786) // Twitter light gray
+                            ) 
+                        },
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyLarge,
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            color = Color(0xFF1A1A1A)
+                        ),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
@@ -225,41 +229,31 @@ fun HomeTabScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.ContentPaste,
                                     contentDescription = stringResource(R.string.paste_from_clipboard),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = Color(0xFF1DA1F2), // Twitter blue
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         },
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            cursorColor = MaterialTheme.colorScheme.primary,
+                            focusedContainerColor = Color(0xFFF7F9FA), // Light gray background
+                            unfocusedContainerColor = Color(0xFFF7F9FA),
+                            disabledContainerColor = Color(0xFFF7F9FA),
+                            cursorColor = Color(0xFF1DA1F2), // Twitter blue cursor
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent,
-                            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            focusedPlaceholderColor = Color(0xFF657786),
+                            unfocusedPlaceholderColor = Color(0xFF657786)
                         )
                     )
-                }
-            }
 
-            // Modern Action Buttons Card (design-only changes)
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                    // Action Buttons Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        FilledTonalButton(
+                        // Paste Button - Twitter blue
+                        Button(
                             onClick = {
                                 val clipboardText = clipboardManager.getText()?.toString() ?: ""
                                 urlText = clipboardText
@@ -269,23 +263,28 @@ fun HomeTabScreen(
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors()
+                                .height(52.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF1DA1F2), // Twitter blue
+                                contentColor = Color.White
+                            )
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.ContentPaste,
                                 contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = stringResource(R.string.paste),
-                                style = MaterialTheme.typography.labelLarge
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
 
+                        // Download Button - Twitter blue
                         Button(
                             onClick = {
                                 if (urlText.isNotEmpty()) {
@@ -309,11 +308,11 @@ fun HomeTabScreen(
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                                .height(52.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                containerColor = Color(0xFF1DA1F2), // Twitter blue
+                                contentColor = Color.White
                             ),
                             enabled = urlText.isNotEmpty()
                         ) {
@@ -322,35 +321,40 @@ fun HomeTabScreen(
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = stringResource(R.string.download),
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
 
-                    // helper/subtext + spacing
-                    Spacer(modifier = Modifier.height(8.dp))
+                    // Tip text
                     Text(
-                        text = stringResource(R.string.tip_text),
+                        text = "Tip: Just paste the link → click download. It's that simple.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        color = Color(0xFF657786), // Twitter light gray
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     )
                 }
             }
 
-            // End minimal home content
-            // Show active download card below controls - persists across tab switches and app restarts
+            // Show active download card below the main card - persists across tab switches and app restarts
             activeDownload?.let { (task, state) ->
                 // Debug logging
                 LaunchedEffect(task.id, state.downloadState) {
                     android.util.Log.d("HomeTabScreen", "Showing download card for task: ${task.url}, state: ${state.downloadState}")
                 }
                 
+                Spacer(modifier = Modifier.height(24.dp))
+                
                 ModernDownloadCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     task = task,
                     state = state,
                     onPlayVideo = { filePath ->
