@@ -53,6 +53,7 @@ import com.rit.twitdownloader.ui.component.ModernBottomNav
 import com.rit.twitdownloader.ui.component.NavTab
 import com.rit.twitdownloader.ui.component.FloatingToast
 import com.rit.twitdownloader.ui.component.BottomBanner
+import com.rit.twitdownloader.ui.component.Material3SystemUiController
 // import com.rit.twitdownloader.ui.component.NavigationDrawer // Assuming this was removed as per earlier steps
 import com.rit.twitdownloader.download.DownloaderV2
 import org.koin.compose.koinInject
@@ -91,15 +92,8 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     // val appName = stringResource(R.string.app_name) // Assuming removed or used elsewhere
     // val scope = rememberCoroutineScope() // Assuming removed
 
-    // Keep status bar painted and consistent across tab transitions
-    SideEffect {
-        (view.context as? Activity)?.window?.let { window ->
-            val topColor = Color.Black
-            window.statusBarColor = topColor.toArgb()
-            WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = false
-            window.setBackgroundDrawable(ColorDrawable(topColor.toArgb()))
-        }
-    }
+    // Use official Material 3 SystemUiController for proper edge-to-edge display
+    Material3SystemUiController()
 
     val onNavigateBack: () -> Unit = {
         with(navController) {
@@ -221,13 +215,17 @@ fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
     ) { paddingValues ->
         // Apply only start/top/end padding so content can extend beneath the bottom bar
         val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
+        
+        // Don't apply top padding for bottom tab routes that use XHeaderScaffold
+        val shouldApplyTopPadding = !isBottomTabRoute
+        
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(
                     start = paddingValues.calculateStartPadding(layoutDirection),
-                    top = paddingValues.calculateTopPadding(),
+                    top = if (shouldApplyTopPadding) paddingValues.calculateTopPadding() else 0.dp,
                     end = paddingValues.calculateEndPadding(layoutDirection)
                 )
         ) {

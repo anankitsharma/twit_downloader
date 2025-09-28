@@ -338,10 +338,10 @@ fun DownloadPageImplV2(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surface,
         floatingActionButton = {},
-    ) { windowInsetsPadding ->
+    ) { _ ->
         val lazyListState = rememberLazyGridState()
         val windowWidthSizeClass = LocalWindowWidthState.current
-        var isGridView by rememberSaveable { mutableStateOf(true) }
+        var isGridView by rememberSaveable { mutableStateOf(false) }
 
         Column(
             modifier = Modifier.fillMaxSize()
@@ -383,8 +383,7 @@ fun DownloadPageImplV2(
                     state = lazyListState,
                     columns = GridCells.Adaptive(240.dp),
                     contentPadding =
-                        windowInsetsPadding +
-                            PaddingValues(start = 20.dp, end = 20.dp, bottom = 80.dp),
+                        PaddingValues(top = 8.dp, start = 20.dp, end = 20.dp, bottom = 80.dp),
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     if (filteredMap.isNotEmpty()) {
@@ -414,6 +413,7 @@ fun DownloadPageImplV2(
                                 VideoCardV2(
                                     modifier = Modifier.padding(bottom = 20.dp).padding(),
                                     viewState = this,
+                                    downloadState = state.downloadState,
                                     actionButton = {
                                         ActionButton(
                                             modifier = Modifier,
@@ -429,6 +429,16 @@ fun DownloadPageImplV2(
                                         )
                                     },
                                     onButtonClick = { showActionSheet(task) },
+                                    onPlayClick = {
+                                        // Open video player for completed downloads
+                                        if (state.downloadState is Task.DownloadState.Completed) {
+                                            state.downloadState.filePath?.let { filePath ->
+                                                FileUtil.openFile(path = filePath) { 
+                                                    context.makeToast("File not available")
+                                                }
+                                            }
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -442,6 +452,7 @@ fun DownloadPageImplV2(
                             VideoListItem(
                                 modifier = Modifier.padding(bottom = 16.dp),
                                 viewState = state.viewState,
+                                downloadState = state.downloadState,
                                 stateIndicator = {
                                     ListItemStateText(
                                         modifier = Modifier.padding(top = 3.dp),
@@ -449,6 +460,16 @@ fun DownloadPageImplV2(
                                     )
                                 },
                                 onButtonClick = { showActionSheet(task) },
+                                onPlayClick = {
+                                    // Open video player for completed downloads
+                                    if (state.downloadState is Task.DownloadState.Completed) {
+                                        state.downloadState.filePath?.let { filePath ->
+                                            FileUtil.openFile(path = filePath) { 
+                                                context.makeToast("File not available")
+                                            }
+                                        }
+                                    }
+                                }
                             )
                         }
                     }

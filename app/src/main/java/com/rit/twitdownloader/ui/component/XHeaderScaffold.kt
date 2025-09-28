@@ -36,38 +36,36 @@ fun XHeaderScaffold(
     title: String = "Home",
     content: @Composable () -> Unit = {}
 ) {
-    val topBarHeight = 72.dp
+    // Modern topbar height following Material Design 3 guidelines
+    val topBarHeight = 80.dp
 
     val view = LocalView.current
     SideEffect {
-        // Ensure status bar area is black and icons are light-on-dark
+        // Ensure status bar icons are white for black background
         (view.context as? Activity)?.window?.let { window ->
-            window.statusBarColor = Color.Black.toArgb()
-            WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = false
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            view.windowInsetsController?.setSystemBarsAppearance(
-                0,
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-            )
+            val windowInsetsController = WindowInsetsControllerCompat(window, view)
+            windowInsetsController.isAppearanceLightStatusBars = false // false = light icons (white)
         }
     }
 
     Column(modifier = modifier.fillMaxSize()) {
         val statusTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val headerBackgroundColor = Color.Black // Consistent with status bar color
+        
+        // Create a single Box that covers both status bar and top bar areas
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF000000))
+                .background(headerBackgroundColor)
                 .height(topBarHeight + statusTop)
         ) {
+            // Top bar content positioned below status bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(topBarHeight)
-                    .padding(horizontal = 16.dp)
-                    .align(Alignment.TopStart)
-                    .padding(top = statusTop),
+                    .padding(horizontal = 20.dp)
+                    .align(Alignment.BottomStart), // Align to bottom of the combined box
                 contentAlignment = Alignment.CenterStart
             ) {
                 Text(
@@ -81,11 +79,11 @@ fun XHeaderScaffold(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .offset(y = (-24).dp),
+                .offset(y = (-28).dp), // Slightly increased offset for better visual separation
             color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 12.dp,
-            tonalElevation = 12.dp,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            shadowElevation = 16.dp, // Increased elevation for better depth perception
+            tonalElevation = 16.dp,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp) // Consistent with AppTopBar radius
         ) {
             content()
         }

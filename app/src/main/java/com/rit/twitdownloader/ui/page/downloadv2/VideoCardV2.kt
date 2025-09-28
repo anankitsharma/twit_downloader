@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.rounded.Download
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import com.rit.twitdownloader.R
 import com.rit.twitdownloader.download.Task
 import com.rit.twitdownloader.download.Task.DownloadState.Canceled
@@ -92,9 +94,11 @@ private val LabelContainerColor: Color = Color.Black.copy(alpha = 0.68f)
 fun VideoCardV2(
     modifier: Modifier = Modifier,
     viewState: Task.ViewState,
+    downloadState: Task.DownloadState? = null,
     stateIndicator: @Composable (BoxScope.() -> Unit)? = null,
     actionButton: @Composable (BoxScope.() -> Unit)? = null,
     onButtonClick: () -> Unit,
+    onPlayClick: (() -> Unit)? = null,
 ) {
     with(viewState) {
         VideoCardV2(
@@ -104,9 +108,11 @@ fun VideoCardV2(
             uploader = uploader,
             duration = duration,
             fileSizeApprox = fileSizeApprox,
+            downloadState = downloadState,
             stateIndicator = stateIndicator,
             actionButton = actionButton,
             onButtonClick = onButtonClick,
+            onPlayClick = onPlayClick,
         )
     }
 }
@@ -115,8 +121,10 @@ fun VideoCardV2(
 fun VideoListItem(
     modifier: Modifier = Modifier,
     viewState: Task.ViewState,
+    downloadState: Task.DownloadState? = null,
     stateIndicator: @Composable (() -> Unit)? = null,
     onButtonClick: () -> Unit,
+    onPlayClick: (() -> Unit)? = null,
 ) {
     with(viewState) {
         VideoListItem(
@@ -126,8 +134,10 @@ fun VideoListItem(
             uploader = uploader,
             duration = duration,
             fileSizeApprox = fileSizeApprox,
+            downloadState = downloadState,
             stateIndicator = stateIndicator,
             onButtonClick = onButtonClick,
+            onPlayClick = onPlayClick,
         )
     }
 }
@@ -140,16 +150,24 @@ fun VideoListItem(
     uploader: String = "",
     duration: Int = 0,
     fileSizeApprox: Double = .0,
+    downloadState: Task.DownloadState? = null,
     stateIndicator: @Composable (() -> Unit)? = null,
     onButtonClick: () -> Unit,
+    onPlayClick: (() -> Unit)? = null,
 ) {
     Row(modifier = modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.Top) {
         Box(modifier = Modifier) {
-            ListItemImage(modifier = Modifier, thumbnailModel = thumbnailModel)
+            ListItemImage(
+                modifier = Modifier, 
+                thumbnailModel = thumbnailModel,
+                downloadState = downloadState,
+                onPlayClick = onPlayClick
+            )
             VideoInfoLabel(
                 modifier = Modifier.align(Alignment.BottomEnd),
                 duration = duration,
                 fileSizeApprox = fileSizeApprox,
+                downloadState = downloadState
             )
         }
         Box {
@@ -178,8 +196,8 @@ fun VideoListItem(
 }
 
 @Preview
-@Composable
 @Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
 private fun VideoListItemPreview() {
     SealTheme {
         val fakeStateList =
@@ -208,13 +226,16 @@ private fun VideoListItemPreview() {
                 thumbnailModel = R.drawable.sample3,
                 title = stringResource(R.string.video_title_sample_text),
                 uploader = stringResource(R.string.video_creator_sample_text),
+                downloadState = downloadState,
                 stateIndicator = {
                     ListItemStateText(
                         modifier = Modifier.padding(top = 3.dp),
                         downloadState = downloadState,
                     )
                 },
-            ) {}
+                onButtonClick = { },
+                onPlayClick = null
+            )
         }
     }
 }
@@ -227,9 +248,11 @@ fun VideoCardV2(
     uploader: String = "",
     duration: Int = 0,
     fileSizeApprox: Double = .0,
+    downloadState: Task.DownloadState? = null,
     stateIndicator: @Composable (BoxScope.() -> Unit)? = null,
     actionButton: @Composable (BoxScope.() -> Unit)? = null,
     onButtonClick: () -> Unit,
+    onPlayClick: (() -> Unit)? = null,
 ) {
     val containerColor =
         MaterialTheme.colorScheme.run {
@@ -242,13 +265,19 @@ fun VideoCardV2(
     ) {
         Column {
             Box(Modifier.fillMaxWidth()) {
-                CardImage(modifier = Modifier, thumbnailModel = thumbnailModel)
+                CardImage(
+                    modifier = Modifier, 
+                    thumbnailModel = thumbnailModel,
+                    downloadState = downloadState,
+                    onPlayClick = onPlayClick
+                )
                 Box(Modifier.align(Alignment.TopStart)) { stateIndicator?.invoke(this) }
                 Box(Modifier.align(Alignment.Center)) { actionButton?.invoke(this) }
                 VideoInfoLabel(
                     modifier = Modifier.align(Alignment.BottomEnd),
                     duration = duration,
                     fileSizeApprox = fileSizeApprox,
+                    downloadState = downloadState
                 )
             }
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -275,60 +304,131 @@ fun VideoCardV2Preview() {
             thumbnailModel = R.drawable.sample3,
             title = stringResource(R.string.video_title_sample_text),
             uploader = stringResource(R.string.video_creator_sample_text),
+            downloadState = downloadState,
             actionButton = { ActionButton(modifier = Modifier, downloadState = downloadState) {} },
             stateIndicator = {
                 CardStateIndicator(modifier = Modifier, downloadState = downloadState)
             },
-        ) {}
-    }
-}
-
-@Composable
-private fun CardImage(modifier: Modifier = Modifier, thumbnailModel: Any? = null) {
-    if (thumbnailModel != null) {
-        AsyncImageImpl(
-            modifier =
-                modifier
-                    .padding()
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true),
-            model = thumbnailModel,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+            onButtonClick = { },
+            onPlayClick = null
         )
-    } else {
-        Surface(
-            modifier =
-                modifier
-                    .padding()
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        ) {}
     }
 }
 
 @Composable
-private fun ListItemImage(modifier: Modifier = Modifier, thumbnailModel: Any? = null) {
-    if (thumbnailModel != null) {
-        AsyncImageImpl(
-            model = thumbnailModel,
-            modifier =
-                Modifier.width(160.dp)
+private fun CardImage(
+    modifier: Modifier = Modifier, 
+    thumbnailModel: Any? = null,
+    downloadState: Task.DownloadState? = null,
+    onPlayClick: (() -> Unit)? = null
+) {
+    Box(modifier = modifier) {
+        if (thumbnailModel != null) {
+            AsyncImageImpl(
+                modifier =
+                    modifier
+                        .padding()
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true),
+                model = thumbnailModel,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Surface(
+                modifier =
+                    modifier
+                        .padding()
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true),
+                color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ) {}
+        }
+        
+        // Play button overlay for completed downloads
+        if (downloadState is Task.DownloadState.Completed && onPlayClick != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
                     .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true)
-                    .clip(MaterialTheme.shapes.extraSmall),
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-        )
-    } else {
-        Box(
-            modifier =
-                modifier
+                    .clickable { onPlayClick() }
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier.size(48.dp),
+                    shape = CircleShape,
+                    color = Color.Black.copy(alpha = 0.6f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = "Play video",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ListItemImage(
+    modifier: Modifier = Modifier, 
+    thumbnailModel: Any? = null,
+    downloadState: Task.DownloadState? = null,
+    onPlayClick: (() -> Unit)? = null
+) {
+    Box(modifier = modifier) {
+        if (thumbnailModel != null) {
+            AsyncImageImpl(
+                model = thumbnailModel,
+                modifier =
+                    Modifier.width(160.dp)
+                        .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true)
+                        .clip(MaterialTheme.shapes.extraSmall),
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+            )
+        } else {
+            Box(
+                modifier =
+                    modifier
+                        .width(160.dp)
+                        .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true)
+                        .clip(MaterialTheme.shapes.extraSmall)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            ) {}
+        }
+        
+        // Play button overlay for completed downloads
+        if (downloadState is Task.DownloadState.Completed && onPlayClick != null) {
+            Box(
+                modifier = Modifier
                     .width(160.dp)
                     .aspectRatio(16f / 9f, matchHeightConstraintsFirst = true)
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-        ) {}
+                    .clickable { onPlayClick() }
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = Color.Black.copy(alpha = 0.6f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = "Play video",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -362,13 +462,44 @@ private fun TitleText(
 }
 
 @Composable
-private fun VideoInfoLabel(modifier: Modifier = Modifier, duration: Int, fileSizeApprox: Double) {
+private fun VideoInfoLabel(
+    modifier: Modifier = Modifier, 
+    duration: Int, 
+    fileSizeApprox: Double,
+    downloadState: Task.DownloadState? = null
+) {
+    val context = LocalContext.current
+    
     Surface(
         modifier = modifier.padding(4.dp),
         color = LabelContainerColor,
         shape = MaterialTheme.shapes.extraSmall,
     ) {
-        val fileSizeText = fileSizeApprox.toFileSizeText()
+        // Use actual file size for completed downloads, otherwise use estimated size
+        val actualFileSize = when (downloadState) {
+            is Task.DownloadState.Completed -> {
+                downloadState.filePath?.let { filePath ->
+                    try {
+                        // Get file size using context
+                        val file = java.io.File(filePath)
+                        if (file.exists()) {
+                            file.length().toDouble()
+                        } else {
+                            // Try DocumentFile for content URIs
+                            androidx.documentfile.provider.DocumentFile.fromSingleUri(
+                                context, 
+                                android.net.Uri.parse(filePath)
+                            )?.length()?.toDouble() ?: fileSizeApprox
+                        }
+                    } catch (e: Exception) {
+                        fileSizeApprox // Fallback to estimated size if file access fails
+                    }
+                } ?: fileSizeApprox
+            }
+            else -> fileSizeApprox
+        }
+        
+        val fileSizeText = actualFileSize.toFileSizeText()
         val durationText = duration.toDurationText()
         Text(
             modifier = Modifier.padding(horizontal = 4.dp),
@@ -455,7 +586,11 @@ fun ListItemStateText(
                 is FetchingInfo,
                 Idle,
                 ReadyWithInfo -> {
-                    CircularProgressIndicator(modifier = sizeModifier, strokeWidth = 2.5.dp)
+                    CircularProgressIndicator(
+                        modifier = sizeModifier, 
+                        strokeWidth = 2.5.dp,
+                        color = Color(0xFF1DA1F2) // Splash screen blue
+                    )
                 }
                 is Running -> {
                     val progress = downloadState.progress
@@ -463,6 +598,7 @@ fun ListItemStateText(
                         progress = { progress },
                         modifier = sizeModifier,
                         strokeWidth = 2.5.dp,
+                        color = Color(0xFF1DA1F2) // Splash screen blue
                     )
                 }
             }

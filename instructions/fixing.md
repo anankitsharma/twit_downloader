@@ -1,5 +1,6 @@
-## Phase 1 – Stability & Core Fixes
-- Ensure video downloads are retained, when app get restarted all the videos downloaded should be download history right? but they are not somehow why it is let's find the root, check articels on itnernet github repos etc what is best way to keep those in app... adn then let's apply fixes 
-- If a video is already downloaded, show **“Already Downloaded”** instead of re-downloading.  
+## Phase 1 - Topbar
+- Improve **topbar**.  
+  - have a look at topbar telegram iamge 1 attached
+  - and our topbar so we should make our topbar to best standards, keep the dseign but width height, and the color of full screen above should be same 
 
-- Optimize tab bar (fix middle button issue). - as it's overflowing from tab, we can make icons etc smaller and make it work  
+  so check offical docs of topbar by android the mdoern standards and craete acccroding to taht... keep the design it's fine but topbar and above it should be more pro

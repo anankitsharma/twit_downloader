@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import com.rit.twitdownloader.App.Companion.context
@@ -41,7 +42,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        
+        // Official Android 15+ edge-to-edge configuration
         enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        
+        // Set status bar to black for consistent appearance across all devices
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.statusBarColor = android.graphics.Color.BLACK
+        }
+        
+        // Set navigation bar to transparent for edge-to-edge display
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        
+        // Disable contrast enforcement for transparent navigation bar (official recommendation)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
 
         context = this.baseContext
         

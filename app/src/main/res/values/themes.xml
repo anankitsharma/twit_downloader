@@ -1,8 +1,18 @@
 <resources>
 
     <style name="Theme.TwitterVideoDownloader" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Official Material 3 edge-to-edge configuration -->
+        <item name="android:statusBarColor">@android:color/black</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:fitsSystemWindows">false</item>
+        <!-- Material 3 specific configurations -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
     </style>
 
     <style name="Theme.TwitterVideoDownloader.Dialog" parent="Theme.Material3.DayNight.NoActionBar">

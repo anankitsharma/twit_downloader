@@ -1,23 +1,18 @@
 # App Development To-Do List
 
 ## Phase 1 – Stability & Core Fixes
-- Fix existing errors and crashes.  
-- Improve overall error handling (no repeating error messages).  
-- Ensure video downloads are retained (persist in app storage).  
-- If a video is already downloaded, show **“Already Downloaded”** instead of re-downloading.  
-- Retain downloads on homepage until user explicitly clears them or closes the app (don’t vanish on tab switch).  
-- Optimize tab bar (fix middle button issue).  
 
-## Phase 2 – UI/UX Enhancements
-- Improve overall UI look and feel.  
-- Update **settings screen** with a more premium design.  
+- Ensure video downloads are retained (persist in app storage).  
+
+
+## Phase 2 – UI/UX Enhancements 
 - Improve **media player design**.  
-- Adjust downloading placeholder UI:  
-- Add **splash screen**.  
-  - Show smaller tiles in downloads screen.  
-  - Keep larger tiles on homepage.  
-  - Keep it in **tiles view** (no full view popup).  
-- Improve **input field style**.  
+  - try to make the topbar of media player transparent
+- Downloading placeholder (on hometab screen)  
+ -  make the colors sync with the splash screen colors 
+- Downloading placeholder (on download tab), 
+  - make the colors sync 
+  - make the items view tiles by deafult instead of big view, the small view should be there
 
 
 ## Phase 3 – New Features

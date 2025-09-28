@@ -453,7 +453,7 @@ private fun ModernDownloadCard(
                             Surface(
                                 modifier = Modifier.size(64.dp),
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                                color = Color(0xFF1DA1F2).copy(alpha = 0.9f) // Splash screen blue
                             ) {
                                 Box(
                                     contentAlignment = Alignment.Center
@@ -478,13 +478,13 @@ private fun ModernDownloadCard(
                                     CircularProgressIndicator(
                                         progress = downloadState.progress,
                                         modifier = Modifier.size(48.dp),
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color(0xFF1DA1F2), // Splash screen blue
                                         strokeWidth = 4.dp
                                     )
                                 } else {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(48.dp),
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = Color(0xFF1DA1F2), // Splash screen blue
                                         strokeWidth = 4.dp
                                     )
                                 }
@@ -517,7 +517,7 @@ private fun ModernDownloadCard(
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(48.dp),
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = Color(0xFF1DA1F2), // Splash screen blue
                                     strokeWidth = 4.dp
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -537,7 +537,7 @@ private fun ModernDownloadCard(
                             ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(48.dp),
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = Color(0xFF1DA1F2), // Splash screen blue
                                     strokeWidth = 4.dp
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -559,7 +559,7 @@ private fun ModernDownloadCard(
                         .padding(12.dp),
                     shape = MaterialTheme.shapes.small,
                     color = when (downloadState) {
-                        is Task.DownloadState.Completed -> MaterialTheme.colorScheme.primary
+                        is Task.DownloadState.Completed -> Color(0xFF1DA1F2) // Splash screen blue
                         is Task.DownloadState.Running -> MaterialTheme.colorScheme.secondary
                         is Task.DownloadState.Error -> MaterialTheme.colorScheme.error
                         else -> MaterialTheme.colorScheme.surfaceVariant

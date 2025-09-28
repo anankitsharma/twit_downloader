@@ -58,7 +58,7 @@ fun VideoPlayerScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black.copy(alpha = 0.7f)
+                    containerColor = Color.Transparent
                 )
             )
         }
