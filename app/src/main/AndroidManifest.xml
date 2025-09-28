@@ -64,7 +64,7 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
-            android:exported="false"
+            android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="unspecified"
             android:theme="@style/Theme.TwitterVideoDownloader">
