@@ -195,8 +195,24 @@ fun DownloadPageV2(
     val scope = rememberCoroutineScope()
     val clipboardManager = LocalClipboardManager.current
     val uriHandler = LocalUriHandler.current
+    var showInstructionScreen by remember { mutableStateOf(false) }
 
-    XHeaderScaffold(title = stringResource(R.string.downloads_history)) {
+    XHeaderScaffold(
+        title = stringResource(R.string.downloads_history),
+        onShareClick = {
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, "🚀 Download any X/Twitter video instantly!\nI just found this amazing app:\nhttps://play.google.com/store/apps/details?id=com.rit.twitdownloader\nTry it once, you'll wonder how you lived without it. 😍")
+                putExtra(Intent.EXTRA_SUBJECT, "XDown: X / Twitter Video Saver")
+            }
+            val chooserIntent = Intent.createChooser(shareIntent, "Share XDown")
+            context.startActivity(chooserIntent)
+        },
+        onInfoClick = {
+            showInstructionScreen = true
+        }
+    ) {
         DownloadPageImplV2(
             modifier = Modifier,
             taskDownloadStateMap = downloader.getTaskStateMap(),
@@ -283,6 +299,13 @@ fun DownloadPageV2(
         }
 
         DownloadDialogViewModel.SelectionState.Idle -> {}
+    }
+
+    if (showInstructionScreen) {
+        com.rit.twitdownloader.ui.page.InstructionScreen(
+            onBackClick = { showInstructionScreen = false },
+            onCloseClick = { showInstructionScreen = false }
+        )
     }
 }
 

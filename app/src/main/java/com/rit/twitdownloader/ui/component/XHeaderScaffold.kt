@@ -74,16 +74,18 @@ fun XHeaderScaffold(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(topBarHeight)
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = 24.dp, vertical = 20.dp) // Increased horizontal padding from 20dp to 24dp
                     .align(Alignment.BottomStart), // Align to bottom of the combined box
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Title on the left
+                // Title on the left with improved padding
                 Text(
                     text = title,
                     color = Color.White,
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 16.dp) // Add some padding after the title
                 )
                 
                 // Action buttons on the right
@@ -126,7 +128,7 @@ fun XHeaderScaffold(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .offset(y = (-28).dp), // Slightly increased offset for better visual separation
+                .offset(y = (-16).dp), // Reduced offset so body starts lower with better spacing
             color = MaterialTheme.colorScheme.surface,
             shadowElevation = 16.dp, // Increased elevation for better depth perception
             tonalElevation = 16.dp,

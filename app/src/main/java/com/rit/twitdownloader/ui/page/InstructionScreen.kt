@@ -1,5 +1,6 @@
 package com.rit.twitdownloader.ui.page
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,10 @@ fun InstructionScreen(
     onBackClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
+    // Handle system back gesture
+    BackHandler {
+        onBackClick()
+    }
     Scaffold(
         topBar = {
             TopAppBar(
