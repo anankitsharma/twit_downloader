@@ -86,6 +86,8 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import com.rit.twitdownloader.ui.common.LocalDarkTheme
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,6 +103,7 @@ fun HomeTabScreen(
     var inlineUrl by rememberSaveable { mutableStateOf("") }
     var hasPastedFromClipboard by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    val context = LocalContext.current
     
     // Find the most recent download to show on homepage - includes completed downloads for persistence
     val activeDownload by remember {
@@ -139,6 +142,7 @@ fun HomeTabScreen(
 
     var showDialog by remember { mutableStateOf(false) }
     var showYouTubeWarning by remember { mutableStateOf(false) }
+    var showInstructionScreen by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // One-time auto-paste from clipboard on first open if the clipboard contains a URL
@@ -178,7 +182,22 @@ fun HomeTabScreen(
         }
     }
 
-    XHeaderScaffold(title = stringResource(R.string.x_video_downloader)) {
+    XHeaderScaffold(
+        title = stringResource(R.string.x_video_downloader),
+        onShareClick = {
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, "🚀 Download any X/Twitter video instantly!\nI just found this amazing app:\nhttps://play.google.com/store/apps/details?id=com.rit.twitdownloader\nTry it once, you'll wonder how you lived without it. 😍")
+                putExtra(Intent.EXTRA_SUBJECT, "XDown: X / Twitter Video Saver")
+            }
+            val chooserIntent = Intent.createChooser(shareIntent, "Share XDown")
+            context.startActivity(chooserIntent)
+        },
+        onInfoClick = {
+            showInstructionScreen = true
+        }
+    ) {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -379,6 +398,13 @@ fun HomeTabScreen(
             title = { Text(stringResource(R.string.warning)) },
             text = { Text(stringResource(R.string.youtube_block_msg)) },
             confirmButton = { TextButton(onClick = { showYouTubeWarning = false }) { Text(text = stringResource(id = android.R.string.ok)) } }
+        )
+    }
+
+    if (showInstructionScreen) {
+        InstructionScreen(
+            onBackClick = { showInstructionScreen = false },
+            onCloseClick = { showInstructionScreen = false }
         )
     }
 

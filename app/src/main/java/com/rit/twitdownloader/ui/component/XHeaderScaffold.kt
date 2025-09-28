@@ -6,14 +6,22 @@ import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,6 +42,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 fun XHeaderScaffold(
     modifier: Modifier = Modifier,
     title: String = "Home",
+    onShareClick: () -> Unit = {},
+    onInfoClick: () -> Unit = {},
     content: @Composable () -> Unit = {}
 ) {
     // Modern topbar height following Material Design 3 guidelines
@@ -60,19 +70,56 @@ fun XHeaderScaffold(
                 .height(topBarHeight + statusTop)
         ) {
             // Top bar content positioned below status bar
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(topBarHeight)
                     .padding(horizontal = 20.dp)
                     .align(Alignment.BottomStart), // Align to bottom of the combined box
-                contentAlignment = Alignment.CenterStart
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                // Title on the left
                 Text(
                     text = title,
                     color = Color.White,
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier.weight(1f)
                 )
+                
+                // Action buttons on the right
+                Row(
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                ) {
+                    // Info icon (left)
+                    IconButton(
+                        onClick = onInfoClick,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .padding(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = "Info",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    // Share icon (rightmost)
+                    IconButton(
+                        onClick = onShareClick,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .padding(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Share,
+                            contentDescription = "Share",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
         }
 
