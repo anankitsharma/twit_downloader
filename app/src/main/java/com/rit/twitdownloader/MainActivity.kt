@@ -3,6 +3,8 @@
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -19,12 +21,15 @@ import com.rit.twitdownloader.util.PreferenceUtil
 import com.rit.twitdownloader.util.matchUrlFromSharedText
 import com.rit.twitdownloader.util.SharedUrlBus
 import com.rit.twitdownloader.util.setLanguage
+import com.rit.twitdownloader.ui.component.RatingDialogFragment
+import com.rit.twitdownloader.util.RatingManager
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.KoinContext
 
 class MainActivity : AppCompatActivity() {
     private val dialogViewModel: DownloadDialogViewModel by viewModel()
+    private lateinit var ratingManager: RatingManager
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +68,15 @@ class MainActivity : AppCompatActivity() {
 
         context = this.baseContext
         
+        // Initialize rating manager
+        ratingManager = RatingManager(this)
+        
+        // Track app launch
+        ratingManager.trackAppLaunch()
+        
+        // Check if we should show rating prompt (based on launches)
+        checkAndShowRatingPrompt()
+        
         setContent {
             KoinContext {
                 val windowSizeClass = calculateWindowSizeClass(this)
@@ -97,6 +111,88 @@ class MainActivity : AppCompatActivity() {
             SharedUrlBus.emit(url)
         }
     }
+
+    private fun checkAndShowRatingPrompt() {
+        println("MainActivity: checkAndShowRatingPrompt() called")
+        val shouldShow = ratingManager.shouldShowRatingPrompt()
+        println("MainActivity: shouldShowRatingPrompt() returned: $shouldShow")
+        
+        if (shouldShow) {
+            println("MainActivity: Showing rating dialog...")
+            showRatingDialog()
+        } else {
+            println("MainActivity: Not showing rating prompt. Debug info: ${ratingManager.getDebugInfo()}")
+        }
+    }
+    
+    private fun showRatingDialog() {
+        // Don't show if already showing
+        if (supportFragmentManager.findFragmentByTag("rating_dialog") != null) {
+            return
+        }
+        
+        // Notify rating manager that prompt is being shown
+        ratingManager.onRatingPromptShown()
+        
+        val dialog = RatingDialogFragment.newInstance()
+        
+        dialog.setOnRatingSubmittedListener { rating ->
+            println("User rated app: $rating stars")
+            ratingManager.onUserRated()
+        }
+        
+        dialog.setOnDismissedListener {
+            println("User dismissed rating dialog (Later)")
+            ratingManager.onUserDismissed()
+        }
+        
+        dialog.show(supportFragmentManager, "rating_dialog")
+    }
+    
+    /**
+     * Call this method when a download completes successfully
+     * This should be called from your download completion handler
+     */
+    fun onDownloadCompleted() {
+        ratingManager.trackSuccessfulDownload()
+        checkAndShowRatingPrompt()
+    }
+    
+    /**
+     * Debug method to simulate app launch
+     * Call this for testing the rating system
+     */
+    fun simulateAppLaunch() {
+        ratingManager.trackAppLaunch()
+        checkAndShowRatingPrompt()
+    }
+    
+    /**
+     * Test method to simulate multiple launches quickly
+     * Call this for testing the rating system
+     */
+    fun testRatingSystem() {
+        // Reset data first
+        ratingManager.resetAll()
+        
+        // Simulate 3 launches - should trigger first prompt
+        println("MainActivity: Testing rating system...")
+        println("MainActivity: Simulating 3 launches...")
+        for (i in 1..3) {
+            ratingManager.trackAppLaunch()
+        }
+        checkAndShowRatingPrompt()
+    }
+    
+    /**
+     * Debug method to reset rating data
+     * Call this for testing the rating system
+     */
+    fun resetRatingData() {
+        ratingManager.resetAll()
+        println("MainActivity: Rating data reset. Debug info: ${ratingManager.getDebugInfo()}")
+    }
+    
 
     private fun Intent.getSharedURL(): String? {
         val intent = this

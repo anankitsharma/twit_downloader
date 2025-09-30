@@ -491,5 +491,13 @@
     <string name="notification_copy_error">Copy Error</string>
     <string name="notification_xdown">XDown</string>
     <string name="service_title">XDown Download Service</string>
+    
+    <!-- Rating popup strings - exact match to reference image -->
+    <string name="rating_popup_title">We are continuing to work on improving the app. Would you like to give us a 5-star rating to motivate us?</string>
+    <string name="rating_popup_cta">The best we can get :)</string>
+    <string name="rating_popup_button">RATE</string>
+    <string name="rating_popup_later">Later</string>
+    <string name="rating_popup_no_thanks">No thanks</string>
+    <string name="rating_popup_emoji">🎉</string>
 </resources>
 

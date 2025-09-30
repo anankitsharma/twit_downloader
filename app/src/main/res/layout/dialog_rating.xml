@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/rating_dialog_background"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- Emoji -->
+    <TextView
+        android:id="@+id/emoji_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rating_popup_emoji"
+        android:textSize="60sp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Main text -->
+            <TextView
+                android:id="@+id/title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/rating_popup_title"
+                android:textColor="@color/rating_main_text"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginBottom="20dp" />
+
+    <!-- Star rating -->
+    <com.rit.twitdownloader.ui.component.StarRatingView
+        android:id="@+id/star_rating_view"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Button container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+        
+        <!-- Rate button -->
+        <Button
+            android:id="@+id/rate_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="@string/rating_popup_button"
+            android:textColor="@color/rating_button_text"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/rating_button_background" />
+        
+        <!-- Later button -->
+        <Button
+            android:id="@+id/later_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="@string/rating_popup_later"
+            android:textColor="@color/rating_main_text"
+            android:textSize="16sp"
+            android:background="@android:color/transparent" />
+        
+    </LinearLayout>
+
+</LinearLayout>

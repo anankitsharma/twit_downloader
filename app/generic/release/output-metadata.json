@@ -11,9 +11,9 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 100040400,
-      "versionName": "1.0.4",
-      "outputFile": "XDown-1.0.4-generic-release.apk"
+      "versionCode": 101000400,
+      "versionName": "1.1.0",
+      "outputFile": "XDown-1.1.0-generic-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/XDown-1.0.4-generic-release.dm"
+        "baselineProfiles/1/XDown-1.1.0-generic-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/XDown-1.0.4-generic-release.dm"
+        "baselineProfiles/0/XDown-1.1.0-generic-release.dm"
       ]
     }
   ],
