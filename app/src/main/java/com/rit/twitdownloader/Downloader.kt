@@ -1,6 +1,5 @@
 ﻿package com.rit.twitdownloader
 
-import android.app.PendingIntent
 import android.util.Log
 import androidx.annotation.CheckResult
 import androidx.compose.runtime.Composable
@@ -191,6 +190,18 @@ object Downloader {
     }
 
     fun makeKey(url: String, templateName: String): String = "${templateName}_$url"
+    
+    private fun extractSpeedFromLine(line: String): String? {
+        // Look for patterns like "246 kB/s", "1.2 MB/s", etc.
+        val speedPattern = Regex("""(\d+(?:\.\d+)?)\s*([KMGT]?B)/s""", RegexOption.IGNORE_CASE)
+        return speedPattern.find(line)?.value
+    }
+    
+    private fun extractFileSizeFromLine(line: String): String? {
+        // Look for patterns like "4.51 MB/24.80 MB", "1.2 GB/2.5 GB", etc.
+        val sizePattern = Regex("""(\d+(?:\.\d+)?\s*[KMGT]?B)/(\d+(?:\.\d+)?\s*[KMGT]?B)""", RegexOption.IGNORE_CASE)
+        return sizePattern.find(line)?.value
+    }
 
     fun onTaskStarted(template: CommandTemplate, url: String) =
         CustomCommandTask(
@@ -218,10 +229,8 @@ object Downloader {
 
     fun onTaskEnded(template: CommandTemplate, url: String, response: String? = null) {
         val key = makeKey(url, template.name)
-        NotificationUtil.finishNotification(
-            notificationId = key.toNotificationId(),
-            title = key,
-            text = context.getString(R.string.status_completed),
+        NotificationUtil.updateServiceNotificationForComplete(
+            title = key
         )
         mutableTaskList.run {
             val oldValue = get(key) ?: return
@@ -307,6 +316,12 @@ object Downloader {
         currentJob =
             applicationScope.launch(Dispatchers.IO) {
                 updateState(State.FetchingInfo)
+                
+                // Show fetching notification using service notification
+                NotificationUtil.updateServiceNotificationForFetching(
+                    title = "Video Download"
+                )
+                
                 DownloadUtil.fetchVideoInfoFromUrl(url = url, preferences = preferences)
                     .onFailure {
                         manageDownloadError(
@@ -387,7 +402,10 @@ object Downloader {
         Log.d(TAG, "downloadVideo: id=${videoInfo.id} " + videoInfo.title)
         Log.d(TAG, "notificationId: $notificationId")
 
-        NotificationUtil.notifyProgress(notificationId = notificationId, title = videoInfo.title)
+        NotificationUtil.updateServiceNotificationForProgress(
+            title = videoInfo.title,
+            progress = 0
+        )
         return DownloadUtil.downloadVideo(
                 videoInfo = videoInfo,
                 playlistUrl = playlistUrl,
@@ -397,12 +415,16 @@ object Downloader {
             ) { progress, _, line ->
                 Log.d(TAG, line)
                 mutableTaskState.update { it.copy(progress = progress, progressText = line) }
-                NotificationUtil.notifyProgress(
-                    notificationId = notificationId,
-                    progress = progress.toInt(),
-                    text = line,
+                // Extract speed and file size from line if available
+                val speed = extractSpeedFromLine(line)
+                val fileSize = extractFileSizeFromLine(line)
+                
+                NotificationUtil.updateServiceNotificationForProgress(
                     title = videoInfo.title,
-                    taskId = taskId,
+                    progress = progress.toInt(),
+                    speed = speed,
+                    fileSize = fileSize,
+                    taskId = taskId
                 )
             }
             .onFailure {
@@ -422,22 +444,10 @@ object Downloader {
                         if (it.isEmpty()) R.string.status_completed
                         else R.string.download_finish_notification
                     )
-                FileUtil.createIntentForOpeningFile(it.firstOrNull()).run {
-                    NotificationUtil.finishNotification(
-                        notificationId,
-                        title = videoInfo.title,
-                        text = text,
-                        intent =
-                            if (this != null)
-                                PendingIntent.getActivity(
-                                    context,
-                                    0,
-                                    this,
-                                    PendingIntent.FLAG_IMMUTABLE,
-                                )
-                            else null,
-                    )
-                }
+                // Update service notification for completion
+                NotificationUtil.updateServiceNotificationForComplete(
+                    title = videoInfo.title
+                )
             }
     }
 
@@ -559,13 +569,10 @@ object Downloader {
             downloadError(url = url.toString(), errorReport = th.message.toString())
         }
 
-        notificationId?.let {
-            NotificationUtil.finishNotification(
-                notificationId = notificationId,
-                title = notificationTitle,
-                text = context.getString(R.string.download_error_msg),
-            )
-        }
+        // Update service notification for error
+        NotificationUtil.updateServiceNotificationForComplete(
+            title = notificationTitle ?: "Download Error"
+        )
         if (isTaskAborted) {
             updateState(State.Idle)
             clearProgressState(isFinished = false)

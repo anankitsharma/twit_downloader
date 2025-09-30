@@ -13,6 +13,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
     alias(libs.plugins.ktfmt.gradle)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")
@@ -308,6 +310,22 @@ dependencies {
     implementation(libs.bundles.youtubedlAndroid)
 
     implementation(libs.mmkv)
+
+    // Firebase BoM - manages all Firebase library versions
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics")
+    
+    // Firebase Crashlytics for crash reporting
+    implementation("com.google.firebase:firebase-crashlytics")
+    
+    // Firebase Messaging for push notifications
+    implementation("com.google.firebase:firebase-messaging")
+    
+    // Add other Firebase products as needed
+    // implementation("com.google.firebase:firebase-firestore")
+    // implementation("com.google.firebase:firebase-auth")
 
     testImplementation(libs.junit4)
     androidTestImplementation(libs.androidx.test.ext)

@@ -31,7 +31,7 @@ room = "2.6.1"
 ksp = "2.0.20-1.0.25"
 
 # Try latest available youtubedl-android artifacts for potential 16KB-aligned prebuilts
-youtubedlAndroid = "0.17.4"
+youtubedlAndroid = "0.18.0"
 
 mmkv = "2.2.3"  # Updated from 1.3.12 - VERIFY 32-BIT SUPPORT if still needed
 # pin to v1.3.x for 32-bit support  <-- Commented out the old note, or you can update it

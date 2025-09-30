@@ -253,6 +253,13 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
         val task = this
         val taskInfo = task.type
         val playlistIndex = if (taskInfo is TypeInfo.Playlist) taskInfo.index else null
+        
+        // Show fetching notification using service notification
+        NotificationUtil.updateServiceNotificationForFetching(
+            title = viewState.title,
+            taskId = id
+        )
+        
         scope
             .launch(Dispatchers.Default) {
                 DownloadUtil.fetchVideoInfoFromUrl(
@@ -276,10 +283,23 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                             textId = R.string.download_error_msg,
                             notificationId = notificationId,
                             report = throwable.stackTraceToString(),
+                            taskId = id,
                         )
                     }
             }
             .also { job -> downloadState = FetchingInfo(job = job, taskId = id) }
+    }
+
+    private fun extractSpeedFromText(text: String): String? {
+        // Look for patterns like "246 kB/s", "1.2 MB/s", etc.
+        val speedPattern = Regex("""(\d+(?:\.\d+)?)\s*([KMGT]?B)/s""", RegexOption.IGNORE_CASE)
+        return speedPattern.find(text)?.value
+    }
+    
+    private fun extractFileSizeFromText(text: String): String? {
+        // Look for patterns like "4.51 MB/24.80 MB", "1.2 GB/2.5 GB", etc.
+        val sizePattern = Regex("""(\d+(?:\.\d+)?\s*[KMGT]?B)/(\d+(?:\.\d+)?\s*[KMGT]?B)""", RegexOption.IGNORE_CASE)
+        return sizePattern.find(text)?.value
     }
 
     private fun Task.download() {
@@ -300,12 +320,16 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                                 is Running -> {
                                     downloadState =
                                         preState.copy(progress = progress, progressText = text)
-                                    NotificationUtil.notifyProgress(
-                                        notificationId = notificationId,
-                                        progress = progressPercentage.toInt(),
-                                        text = text,
+                                    // Extract speed and file size from text if available
+                                    val speed = extractSpeedFromText(text)
+                                    val fileSize = extractFileSizeFromText(text)
+                                    
+                                    NotificationUtil.updateServiceNotificationForProgress(
                                         title = viewState.title,
-                                        taskId = id,
+                                        progress = progressPercentage.toInt(),
+                                        speed = speed,
+                                        fileSize = fileSize,
+                                        taskId = id
                                     )
                                 }
                                 else -> {}
@@ -345,22 +369,11 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                                 if (pathList.isEmpty()) R.string.status_completed
                                 else R.string.download_finish_notification
                             )
-                        FileUtil.createIntentForOpeningFile(pathList.firstOrNull()).run {
-                            NotificationUtil.finishNotification(
-                                notificationId,
-                                title = viewState.title,
-                                text = text,
-                                intent =
-                                    if (this != null)
-                                        PendingIntent.getActivity(
-                                            appContext,
-                                            0,
-                                            this,
-                                            PendingIntent.FLAG_IMMUTABLE,
-                                        )
-                                    else null,
-                            )
-                        }
+                        // Update service notification for completion
+                        NotificationUtil.updateServiceNotificationForComplete(
+                            title = viewState.title,
+                            filePath = pathList.firstOrNull()
+                        )
                     }
                     .onFailure { throwable ->
                         if (throwable is YoutubeDL.CanceledException) {
@@ -372,6 +385,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                             textId = R.string.fetch_info_error_msg,
                             notificationId = notificationId,
                             report = throwable.stackTraceToString(),
+                            taskId = id,
                         )
                     }
             }
@@ -462,6 +476,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
                             textId = R.string.fetch_info_error_msg,
                             notificationId = notificationId,
                             report = throwable.stackTraceToString(),
+                            taskId = id,
                         )
                     }
                     .onSuccess {

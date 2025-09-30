@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Background circle with gradient effect -->
+    <path
+        android:fillColor="#1DA1F2"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z"/>
+    
+    <!-- Inner circle for depth -->
+    <path
+        android:fillColor="#0D8BD9"
+        android:pathData="M12,4C7.58,4 4,7.58 4,12s3.58,8 8,8 8,-3.58 8,-8S16.42,4 12,4z"/>
+    
+    <!-- X letter with better design -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9,9L10.4,10.4L12,8.8L13.6,10.4L15,9L13.4,7.4L15,5.8L13.6,4.4L12,6L10.4,4.4L9,5.8L10.6,7.4L9,9Z"/>
+    
+    <!-- Download arrow with better design -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,12.5L12,16L10.8,14.8L10.2,15.4L12,17.2L13.8,15.4L13.2,14.8L12,16L12,12.5Z"/>
+    
+    <!-- Horizontal line with better design -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9.5,18.5L14.5,18.5L14.5,19.5L9.5,19.5Z"/>
+</vector>

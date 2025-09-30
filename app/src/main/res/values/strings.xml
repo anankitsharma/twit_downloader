@@ -150,7 +150,6 @@
     <string name="permission_issue_desc">Directories outside Download/ and Documents/ are not supported</string>
     <string name="battery_configuration">Battery configuration</string>
     <string name="battery_configuration_desc">Ignore battery optimization for this app to download in the background</string>
-    <string name="service_title">Twitter Video Downloader is downloading…</string>
     <string name="unknown_error">Unknown error</string>
     <string name="translate">Translate</string>
     <string name="translate_desc">Help translate this app on Hosted Weblate</string>
@@ -473,5 +472,24 @@
     <string name="tip_text">Tip: Just paste link -> click on download  it is that simple.</string>
     <string name="privacy_policy_url">https://teknologya.com/privacy-policy-xdown/</string>
     <string name="contact_email">ankit8053@gmail.com</string>
+    
+    <!-- XDown Notification Strings -->
+    <string name="notification_downloading">Downloading</string>
+    <string name="notification_paused">Paused</string>
+    <string name="notification_completed">Download Complete</string>
+    <string name="notification_failed">Download Failed</string>
+    <string name="notification_speed_format">%1$s/s</string>
+    <string name="notification_eta_format">ETA: %1$s</string>
+    <string name="notification_file_size_format">%1$s/%2$s</string>
+    <string name="notification_download_time_format">Downloaded in %1$s</string>
+    <string name="notification_play">Play</string>
+    <string name="notification_share">Share</string>
+    <string name="notification_open">Open</string>
+    <string name="notification_pause">Pause</string>
+    <string name="notification_resume">Resume</string>
+    <string name="notification_retry">Retry</string>
+    <string name="notification_copy_error">Copy Error</string>
+    <string name="notification_xdown">XDown</string>
+    <string name="service_title">XDown Download Service</string>
 </resources>
 

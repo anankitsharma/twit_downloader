@@ -15,6 +15,9 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.content.getSystemService
 import com.google.android.material.color.DynamicColors
+import com.google.firebase.FirebaseApp
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.messaging.FirebaseMessaging
 import com.rit.twitdownloader.download.DownloaderV2
 import com.rit.twitdownloader.download.DownloaderV2Impl
 import com.rit.twitdownloader.ui.page.download.HomePageViewModel
@@ -58,6 +61,16 @@ import org.koin.dsl.module
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
+        
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+        
+        // Initialize Firebase Crashlytics
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+        
+        // Initialize Firebase Messaging
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
+        
         MMKV.initialize(this)
 
         startKoin {
