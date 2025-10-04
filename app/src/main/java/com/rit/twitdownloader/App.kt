@@ -46,6 +46,8 @@ import com.tencent.mmkv.MMKV
 import com.yausername.aria2c.Aria2c
 import com.yausername.ffmpeg.FFmpeg
 import com.yausername.youtubedl_android.YoutubeDL
+import com.google.android.gms.ads.MobileAds
+import com.rit.twitdownloader.ads.AdManager
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +73,9 @@ class App : Application() {
         // Initialize Firebase Messaging
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
         
+        // Initialize AdMob
+        MobileAds.initialize(this) {}
+        
         MMKV.initialize(this)
 
         startKoin {
@@ -79,6 +84,7 @@ class App : Application() {
             modules(
                 module {
                     single<DownloaderV2> { DownloaderV2Impl(androidContext()) }
+                    single<AdManager> { AdManager(androidContext()) }
                     viewModel { DownloadDialogViewModel(downloader = get()) }
                     viewModel { HomePageViewModel() }
                     viewModel { CookiesViewModel() }
@@ -95,6 +101,8 @@ class App : Application() {
                 else getPackageInfo(packageName, 0)
             }
         applicationScope = CoroutineScope(SupervisorJob())
+        
+        // AdManager will be initialized when needed in SplashActivity
         DynamicColors.applyToActivitiesIfAvailable(this)
 
         clipboard = getSystemService()!!
@@ -249,7 +257,7 @@ class App : Application() {
                 .toString()
         }
 
-        fun isFDroidBuild(): Boolean = BuildConfig.FLAVOR == "fdroid"
+        fun isFDroidBuild(): Boolean = false
 
         fun isDebugBuild(): Boolean = BuildConfig.DEBUG
 

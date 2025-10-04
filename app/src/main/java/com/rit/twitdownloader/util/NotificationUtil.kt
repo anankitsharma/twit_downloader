@@ -182,7 +182,7 @@ object NotificationUtil {
         //        notificationManager.cancel(notificationId)
         val builder =
             NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_stat_seal)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentText(text)
                 .setProgress(0, 0, false)
                 .setAutoCancel(true)

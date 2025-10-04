@@ -1,9 +1,13 @@
 package com.rit.twitdownloader.ui.player
 
+import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.Rational
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -27,6 +31,7 @@ class VideoPlayerActivity : ComponentActivity() {
     }
     
     private val viewModel: VideoPlayerViewModel by viewModels()
+    private var isInPictureInPictureMode = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +77,8 @@ class VideoPlayerActivity : ComponentActivity() {
                             lifecycleScope.launch {
                                 showErrorWithFallback(error)
                             }
-                        }
+                        },
+                        isInPictureInPictureMode = isInPictureInPictureMode
                     )
                 }
             }
@@ -87,6 +93,45 @@ class VideoPlayerActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.releasePlayer()
+    }
+    
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        // Enter PiP mode when user presses home button
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            enterPiPMode()
+        }
+    }
+    
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        this.isInPictureInPictureMode = isInPictureInPictureMode
+        
+        if (isInPictureInPictureMode) {
+            // Hide UI elements when entering PiP mode
+            Log.d(TAG, "Entered Picture-in-Picture mode")
+        } else {
+            // Show UI elements when exiting PiP mode
+            Log.d(TAG, "Exited Picture-in-Picture mode")
+        }
+    }
+    
+    private fun enterPiPMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                val pipParams = PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(16, 9)) // Standard video aspect ratio
+                    .build()
+                
+                enterPictureInPictureMode(pipParams)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to enter Picture-in-Picture mode", e)
+                ToastUtil.makeToast("Picture-in-Picture not available")
+            }
+        }
     }
     
     private fun isVideoFileAccessible(uri: Uri): Boolean {

@@ -67,6 +67,8 @@ import com.rit.twitdownloader.ui.page.settings.network.CookiesViewModel
 import com.rit.twitdownloader.ui.page.videolist.VideoListPage
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import com.rit.twitdownloader.ads.AdManager
+import org.koin.compose.koinInject
 
 private const val TAG = "HomeEntry"
 
@@ -80,6 +82,7 @@ private val BottomTabDestinations =
 fun AppEntry(dialogViewModel: DownloadDialogViewModel) {
 
     val navController = rememberNavController()
+    val adManager: AdManager = koinInject()
     val context = LocalContext.current
     val view = LocalView.current
     // val windowWidth = LocalWindowWidthState.current // Assuming removed

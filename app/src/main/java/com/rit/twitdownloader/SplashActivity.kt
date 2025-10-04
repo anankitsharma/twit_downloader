@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import org.koin.compose.koinInject
+import com.rit.twitdownloader.ads.AdManager
 
 class SplashActivity : AppCompatActivity() {
     
@@ -50,6 +52,9 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
     var alpha by remember { mutableStateOf(0f) }
     var progress by remember { mutableStateOf(0f) }
     
+    val adManager: AdManager = koinInject()
+    val activity = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
+    
     // X/Twitter gradient background colors
     val gradientStart = Color(0xFF000000) // Pure black
     val gradientMid = Color(0xFF1A1A1A) // Dark gray
@@ -74,9 +79,48 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             delay(12) // Smooth progress animation
         }
         
-        // Auto-finish after progress completes
-        delay(200)
-        onSplashFinished()
+        // Check if we should show ad
+        val shouldShowAd = adManager.shouldShowSplashAd()
+        android.util.Log.d("SplashActivity", "Should show ad: $shouldShowAd")
+        
+        if (shouldShowAd) {
+            android.util.Log.d("SplashActivity", "Loading splash ad...")
+            // Load ad in background during splash
+            adManager.loadSplashAd()
+            
+            // Wait longer for ad to load (up to 2 seconds)
+            var attempts = 0
+            val maxAttempts = 20 // 2 seconds total
+            var isAdReady = false
+            
+            while (attempts < maxAttempts && !isAdReady) {
+                delay(100)
+                isAdReady = adManager.isSplashAdReady()
+                attempts++
+                android.util.Log.d("SplashActivity", "Ad loading attempt $attempts: ready=$isAdReady")
+            }
+            
+            android.util.Log.d("SplashActivity", "Final ad status: ready=$isAdReady after $attempts attempts")
+            
+            // Show ad if ready, otherwise go to main app
+            activity?.let { act ->
+                adManager.showSplashAd(act) {
+                    android.util.Log.d("SplashActivity", "Ad closed, going to main app")
+                    onSplashFinished()
+                }
+            } ?: run {
+                android.util.Log.w("SplashActivity", "No activity context available, going to main app")
+                onSplashFinished()
+            }
+        } else {
+            android.util.Log.d("SplashActivity", "First launch - no ad, going to main app")
+            // First launch - no ad, go directly to main app
+            delay(200)
+            onSplashFinished()
+        }
+        
+        // Mark app as launched (for future ad shows) - only after we've decided what to do
+        adManager.markAppLaunched()
     }
     
     Box(

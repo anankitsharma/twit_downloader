@@ -34,7 +34,8 @@ import com.rit.twitdownloader.util.ToastUtil
 fun VideoPlayerScreen(
     viewModel: VideoPlayerViewModel,
     onBackPressed: () -> Unit,
-    onError: (String) -> Unit
+    onError: (String) -> Unit,
+    isInPictureInPictureMode: Boolean = false
 ) {
     val playerState by viewModel.playerState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -47,20 +48,22 @@ fun VideoPlayerScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+            if (!isInPictureInPictureMode) {
+                TopAppBar(
+                    title = { },
+                    navigationIcon = {
+                        IconButton(onClick = onBackPressed) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
     ) { paddingValues ->
         Box(

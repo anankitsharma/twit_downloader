@@ -128,6 +128,10 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
+            isJniDebuggable = false
+            isPseudoLocalesEnabled = false
+            isZipAlignEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -151,19 +155,7 @@ android {
         }
     }
 
-    flavorDimensions += "publishChannel"
-
-    productFlavors {
-        create("generic") {
-            dimension = "publishChannel"
-            isDefault = true
-        }
-
-        create("fdroid") {
-            dimension = "publishChannel"
-            versionName = "$baseVersionName-(F-Droid)"
-        }
-    }
+    // No flavors
 
     lint { disable.addAll(listOf("MissingTranslation", "ExtraTranslation", "MissingQuantity")) }
 
@@ -187,11 +179,8 @@ android {
 
             // Keep all engine libraries packaged; they are required at runtime.
             // Prefer app-provided aligned libs if there are duplicates from dependencies
-            pickFirsts += "**/libffmpeg.so"
-            pickFirsts += "**/libffprobe.so"
             pickFirsts += "**/libaria2c.so"
             pickFirsts += "**/libpython.so"
-            pickFirsts += "**/libffmpeg.zip.so"
             pickFirsts += "**/libaria2c.zip.so"
             pickFirsts += "**/libpython.zip.so"
         }
@@ -326,6 +315,9 @@ dependencies {
     // Add other Firebase products as needed
     // implementation("com.google.firebase:firebase-firestore")
     // implementation("com.google.firebase:firebase-auth")
+
+    // Google Mobile Ads SDK
+    implementation("com.google.android.gms:play-services-ads:23.5.0")
 
     testImplementation(libs.junit4)
     androidTestImplementation(libs.androidx.test.ext)

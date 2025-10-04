@@ -98,6 +98,7 @@ import com.rit.twitdownloader.ui.component.SealSearchBar
 import com.rit.twitdownloader.ui.component.VideoFilterChip
 import com.rit.twitdownloader.ui.svg.DynamicColorImageVectors
 import com.rit.twitdownloader.ui.svg.drawablevectors.videoSteaming
+import com.rit.twitdownloader.ads.BannerAdView
 import com.rit.twitdownloader.util.AUDIO_REGEX
 import com.rit.twitdownloader.util.FileUtil
 import com.rit.twitdownloader.util.ToastUtil
@@ -564,6 +565,15 @@ fun VideoListPage(viewModel: VideoListViewModel = koinViewModel(), onNavigateBac
                             )
                         }
                     }
+                }
+            }
+            
+            // Banner Ad at the bottom of the list
+            if (videoList.isNotEmpty()) {
+                item {
+                    BannerAdView(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                 }
             }
         }

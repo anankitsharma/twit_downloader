@@ -88,6 +88,12 @@ import androidx.compose.ui.focus.focusRequester
 import com.rit.twitdownloader.ui.common.LocalDarkTheme
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
+import com.rit.twitdownloader.ads.BannerAdView
+import org.koin.compose.koinInject
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,6 +110,11 @@ fun HomeTabScreen(
     var hasPastedFromClipboard by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val adManager: com.rit.twitdownloader.ads.AdManager = koinInject()
+    
+    // Get activity context for showing ads
+    val activity = context as? android.app.Activity
     
     // Find the most recent download to show on homepage - includes completed downloads for persistence
     val activeDownload by remember {
@@ -388,6 +399,62 @@ fun HomeTabScreen(
                     },
                     onOpenDownloads = onOpenDownloads
                 )
+            }
+            
+            // Banner Ad at the bottom
+            Spacer(modifier = Modifier.height(16.dp))
+            BannerAdView(
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            
+            // Test buttons for debugging
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            // Test interstitial ad
+                            activity?.let { act ->
+                                adManager.loadSplashAd()
+                                coroutineScope.launch {
+                                    kotlinx.coroutines.delay(1000)
+                                    adManager.showSplashAd(act) { }
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Test Ad")
+                    }
+                    
+                    Button(
+                        onClick = {
+                            // Reset first launch flag
+                            adManager.resetFirstLaunch()
+                            ToastUtil.makeToast("First launch reset! Close and reopen app to test splash ad.")
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Reset Launch")
+                    }
+                }
+                
+                Button(
+                    onClick = {
+                        // Check current state
+                        val shouldShow = adManager.shouldShowSplashAd()
+                        ToastUtil.makeToast("Should show splash ad: $shouldShow")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Check State")
+                }
             }
         }
     }

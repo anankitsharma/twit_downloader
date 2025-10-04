@@ -22,7 +22,30 @@
 
 #noinspection ShrinkerUnresolvedReference
 
--dontobfuscate
+# Enable obfuscation for better size reduction
+#-dontobfuscate
+
+# Aggressive optimization for size reduction
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
+-optimizationpasses 5
+-allowaccessmodification
+-dontpreverify
+
+# Remove unused code more aggressively
+-dontwarn **
+-ignorewarnings
+
+# Remove logging in release builds
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+
+# Remove unused resources more aggressively
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
 
 -keep class com.yausername.** { *; }
 -keep class org.apache.commons.compress.archivers.zip.** { *; }
